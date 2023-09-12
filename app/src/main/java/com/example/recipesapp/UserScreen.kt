@@ -1,5 +1,6 @@
 package com.example.recipesapp
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +14,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -26,17 +31,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
 fun UserScreen(navController: NavController){
     val isLoginScreen = remember { mutableStateOf(true) }
+    val login = remember{ mutableStateOf("") }
+    val password = remember{ mutableStateOf("") }
+    val name = remember{ mutableStateOf("") }
     Column(modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 24.dp), horizontalAlignment = Alignment.CenterHorizontally,
@@ -44,9 +62,10 @@ fun UserScreen(navController: NavController){
         Column(horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)) {
             TopUserBar()
-            EditTextLine(name = "Login", editTextName = "Enter login")
-            EditTextLine(name = "Password", editTextName = "Enter password")
-            EditTextLine(name = "Email", editTextName = "Enter email")
+            EditTextLine(modifier = Modifier, text = login.value, onTextChanged = {login.value = it}, hint = "Login")
+            EditTextLine(modifier = Modifier, text = password.value, onTextChanged = {password.value = it}, hint = "Password")
+            EditTextLine(modifier = Modifier, text = name.value, onTextChanged = {name.value = it}, hint = "Name")
+
         }
         Column(verticalArrangement = Arrangement.spacedBy(8.dp),horizontalAlignment = Alignment.CenterHorizontally,){
             ConfirmButton()
@@ -63,63 +82,105 @@ fun TopUserBar(){
         fontSize = MaterialTheme.typography.displayLarge.fontSize,
     )
 }
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EditTextLine(name: String, editTextName: String){
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround){
-        var text by remember { mutableStateOf("") }
-        Text(text = name,
-            fontStyle = MaterialTheme.typography.headlineMedium.fontStyle,
-            fontWeight = MaterialTheme.typography.headlineMedium.fontWeight,
-            fontFamily = MaterialTheme.typography.headlineMedium.fontFamily,
-            fontSize = MaterialTheme.typography.headlineMedium.fontSize,)
-        TextField(value = text, onValueChange = {text = it}, placeholder = { Text(text = editTextName) }, colors = TextFieldDefaults.textFieldColors(textColor = MaterialTheme.colorScheme.tertiary, containerColor = MaterialTheme.colorScheme.secondary) )
-    }
-}
 @Composable
 fun ConfirmButton(){
     Box(modifier = Modifier
-        .clip(CircleShape)
+        .clip(RoundedCornerShape(4.dp))
         .background(MaterialTheme.colorScheme.secondary)
         .height(48.dp)
         .width(256.dp)
         .clickable { }){
-        Text("Confirm",
-            fontStyle = MaterialTheme.typography.headlineMedium.fontStyle,
-            fontWeight = MaterialTheme.typography.headlineMedium.fontWeight,
-            fontFamily = MaterialTheme.typography.headlineMedium.fontFamily,
-            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth())
+
+        MaterialText("Confirm", MaterialTheme.typography.headlineMedium, modifier = Modifier
+            .fillMaxWidth()
+            .align(Alignment.Center), textAlign = TextAlign.Center)
     }
 }
 @Composable
 fun SearchOrLoginLine(isLoginScreen: MutableState<Boolean>){
-    Row(/*horizontalArrangement = Arrangement.spacedBy(16.dp)*/){
+    Row(
+        Modifier
+            .padding(top = 12.dp)
+            .width(256.dp), horizontalArrangement = Arrangement.SpaceAround){
 
         Box(modifier = Modifier
-            .clip(CircleShape)
-            .padding(top = 12.dp)
+            .clip(RoundedCornerShape(10.dp))
             .clickable { isLoginScreen.value = true }){
-            Text("Log in",
-                modifier = Modifier.fillMaxWidth(),
-                fontStyle = MaterialTheme.typography.headlineSmall.fontStyle,
-                fontWeight = MaterialTheme.typography.headlineSmall.fontWeight,
-                fontFamily = MaterialTheme.typography.headlineSmall.fontFamily,
-                fontSize = MaterialTheme.typography.headlineSmall.fontSize,
-                textAlign = TextAlign.Center)
+
+            MaterialText("Log in", MaterialTheme.typography.headlineSmall, modifier = Modifier, textAlign = TextAlign.Center)
         }
         Box(modifier = Modifier
+            .padding(end = 4.dp, start = 4.dp)
             .clip(CircleShape)
-            .padding(top = 12.dp)
             .clickable { isLoginScreen.value = false }){
-            Text("Create account",
-                modifier = Modifier.fillMaxWidth(),
-                fontStyle = MaterialTheme.typography.headlineSmall.fontStyle,
-                fontWeight = MaterialTheme.typography.headlineSmall.fontWeight,
-                fontFamily = MaterialTheme.typography.headlineSmall.fontFamily,
-                fontSize = MaterialTheme.typography.headlineSmall.fontSize,
-                textAlign = TextAlign.Center)
+
+            MaterialText("Create account", MaterialTheme.typography.headlineSmall, modifier = Modifier, textAlign = TextAlign.Center)
+        }
+    }
+}@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun EditTextLine(
+    modifier: Modifier = Modifier,
+    text: String,
+    onTextChanged: (String) -> Unit,
+    hint: String,
+    // icon: @DrawableRes Int
+) {
+    var isTextFieldFocused by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val density = LocalDensity.current.density
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(4.dp))
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painterResource(id = R.drawable.baseline_lock_24),
+            contentDescription = null,
+            modifier = Modifier
+                .size(48.dp)
+                .align(Alignment.CenterVertically)
+        )
+
+        Column(
+            modifier = Modifier.weight(1f) // To make the Column take available horizontal space
+        ) {
+            Text(
+                text = hint,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+
+            BasicTextField(
+                value = text,
+                onValueChange = {
+                    onTextChanged(it)
+                },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                    }
+                ),
+                textStyle = TextStyle(
+                    fontSize = 16.sp
+                ),
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 8.dp, 0.dp, 0.dp)
+                    .onFocusChanged { focusState ->
+                        isTextFieldFocused = focusState.isFocused
+                    }
+            )
         }
     }
 }

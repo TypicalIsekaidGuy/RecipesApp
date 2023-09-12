@@ -15,10 +15,14 @@ import androidx.compose.ui.unit.sp
 import com.example.recipesapp.ui.theme.RecipesAppTheme
 import com.example.recipesapp.ui.theme.Typography
 import com.example.recipesapp.ui.theme.firaSansFamily
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val auth = FirebaseAuth.getInstance()
         setContent {
             RecipesAppTheme {
                 Navigation(/*viewModel = viewModel*/)

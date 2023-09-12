@@ -5,7 +5,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 class SignInModule {
-    private var auth: FirebaseAuth = Firebase.auth
+    private var auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     fun onStart(){
 

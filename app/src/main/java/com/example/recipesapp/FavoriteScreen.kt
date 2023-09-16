@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,12 +44,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.recipesapp.ui.MaterialText
 import com.example.recipesapp.ui.theme.RecipesAppTheme
 import com.example.recipesapp.ui.theme.firaSansFamily
 
 
 @Composable
-fun FavoriteScreen(controller: NavHostController) {
+fun FavoriteScreen(controller: NavHostController, viewModel: FavoriteViewModel) {
 
     val imageResource = R.drawable.test_image // Replace with your image resource name
     val context = LocalContext.current
@@ -81,6 +83,8 @@ fun FavoriteTopBar(goBackToScreen: ()-> Unit){
             .padding(top = 16.dp)
             .fillMaxWidth()
     ) {
+
+
         Box(modifier = Modifier
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.secondary)
@@ -89,14 +93,16 @@ fun FavoriteTopBar(goBackToScreen: ()-> Unit){
             Icon(
                 painter = painterResource(id = R.drawable.baseline_exit_24),
                 contentDescription = "Icon 2",
-                modifier = Modifier.clickable { goBackToScreen() }
+                modifier = Modifier.clickable { goBackToScreen() },
+                tint = MaterialTheme.colorScheme.primary
             )
         }
         Box(modifier = Modifier.align(Alignment.Center)){
 
-            Text(text = "Favorite Recipe", fontSize = 24.sp, color = MaterialTheme.colorScheme.tertiary, textAlign = TextAlign.Center)
+            MaterialText(text = "Favorite Recipe", modifier = Modifier, textStyle = MaterialTheme.typography.displayLarge, textAlign = TextAlign.Center)
         }
-        Spacer(modifier = Modifier)
+            Spacer(modifier = Modifier.fillMaxWidth())
+
     }
 }
 @Composable
@@ -129,8 +135,8 @@ fun MealSlideItem(meal: Meal) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Row() {
-                Text(text = meal.name, textAlign = TextAlign.Left, fontSize = 32.sp)
-                Text(text = " ${meal.recipies.size}")
+                Text(text = meal.name, textAlign = TextAlign.Left, fontSize = 32.sp, color = MaterialTheme.colorScheme.tertiary)
+                Text(text = " ${meal.recipies.size}", color = MaterialTheme.colorScheme.tertiary)
             }
             Icon(
                 painter = painterResource(id = R.drawable.baseline_arrow_drop_down_24),
@@ -151,7 +157,7 @@ fun MealSlideItem(meal: Meal) {
         )
         // Content to be revealed
         AnimatedVisibility(visible = isExpanded) {
-            LazyVerticalGrid(columns = GridCells.Fixed(2)){
+            LazyVerticalGrid(columns = GridCells.Fixed(2), horizontalArrangement = Arrangement.spacedBy(8.dp)){
                 items(meal.recipies.size){index->
                     MealItem(recipe = meal.recipies[index])
                 }
@@ -162,10 +168,14 @@ fun MealSlideItem(meal: Meal) {
 @Composable
 fun MealItem(recipe: RecipePreview){
     Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 16.dp)) {
-        Image(bitmap = recipe.image, contentDescription = null, modifier = Modifier.clip(
+        Box( modifier = Modifier.clip(
             RoundedCornerShape(12.dp)
-        ))
-        Text(recipe.name, textAlign = TextAlign.Center, fontSize = 16.sp)
+        )){
+            Image(bitmap = recipe.image, contentDescription = null, modifier = Modifier.clip(
+                RoundedCornerShape(12.dp)
+            ))
+        }
+        Text(recipe.name, textAlign = TextAlign.Center, fontSize = 16.sp, color = MaterialTheme.colorScheme.tertiary)
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
             UnderneathSpecifier(Modifier, MaterialTheme.colorScheme.tertiary, "${ recipe.prepareTime } mins")
             UnderneathSpecifier(Modifier, MaterialTheme.colorScheme.tertiary, "${ recipe.views }k views ")

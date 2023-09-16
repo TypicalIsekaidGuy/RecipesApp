@@ -16,11 +16,24 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun UnderneathSpecifier(
-    modifier : Modifier,
+    modifier: Modifier,
     color: Color,
     text: String
-){
-    Box(modifier = modifier.background(MaterialTheme.colorScheme.secondary).clip(RoundedCornerShape(24.dp)).padding(horizontal = 6.dp)){
-        Text(fontSize = 12.sp, color = color, text = text)
+) {
+    Box(
+        modifier = modifier.clip(RoundedCornerShape(24.dp))
+    ) {
+        Box(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.secondary)
+                .clip(RoundedCornerShape(24.dp))
+                .padding(horizontal = 6.dp)
+        ) {
+            Text(
+                fontSize = 12.sp,
+                color = color,
+                text = text,
+            )
+        }
     }
 }

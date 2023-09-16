@@ -1,4 +1,4 @@
-package com.example.recipesapp
+package com.example.recipesapp.ui
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -13,7 +13,7 @@ fun MaterialText(
     text: String,
     textStyle: TextStyle,
     modifier: Modifier,
-    textAlign: TextAlign
+    textAlign: TextAlign? = null
 ){
 
     Text(text = text,

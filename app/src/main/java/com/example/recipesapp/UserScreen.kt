@@ -48,9 +48,10 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.recipesapp.ui.MaterialText
 
 @Composable
-fun UserScreen(navController: NavController){
+fun UserScreen(navController: NavController, userViewModel: UserViewModel){
     val isLoginScreen = remember { mutableStateOf(true) }
     val login = remember{ mutableStateOf("") }
     val password = remember{ mutableStateOf("") }

@@ -50,7 +50,7 @@ import com.example.recipesapp.ui.theme.firaSansFamily
 
 
 @Composable
-fun FavoriteScreen(controller: NavHostController, viewModel: FavoriteViewModel) {
+fun FavoriteScreen(controller: NavHostController, viewModel: FavoriteViewModel){
 
     val imageResource = R.drawable.test_image // Replace with your image resource name
     val context = LocalContext.current

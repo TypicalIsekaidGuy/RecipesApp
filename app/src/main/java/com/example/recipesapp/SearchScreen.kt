@@ -2,6 +2,8 @@ package com.example.recipesapp
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,22 +13,30 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -74,6 +84,7 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
         .padding(horizontal = 16.dp)) {
         SearchTopBar()
         SearchSortBar(modifier = Modifier, sortList = sortList )
+        RecipePreviewList(Meal("Salad",list))
     }
 }
 @Composable
@@ -187,10 +198,44 @@ fun PickTypeBar(){
 
 }
 @Composable
-fun RecipePreviewList(){
+fun RecipePreviewList(meal: Meal) {
+    var isExpanded by remember { mutableStateOf(false) }
 
+    Column(
+        horizontalAlignment = Alignment.Start,
+        modifier = Modifier
+            .padding(bottom = 16.dp, top = 16.dp)
+            .fillMaxWidth()
+    ) {
+        // Content to be revealed
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)){
+                items(meal.recipies.size){index->
+                    RecipePreviewItem(recipe = meal.recipies[index])
+                }
+            }
+
+    }
 }
 @Composable
-fun RecipePreviewItem(){
+fun RecipePreviewItem(recipe: RecipePreview){
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 16.dp)) {
 
+    }
+    Box( modifier = Modifier.clip(
+        RoundedCornerShape(12.dp))
+        .size(width = 200.dp, height = 500.dp)){
+        Image(bitmap = recipe.image, contentDescription = null, modifier = Modifier.clip(
+            RoundedCornerShape(12.dp)
+        ))
+        Column(
+            verticalArrangement = Arrangement.Bottom, // Align the Column to the bottom
+            modifier = Modifier.fillMaxHeight()) {
+
+            MaterialText(recipe.name, textAlign = TextAlign.Center, textStyle = MaterialTheme.typography.displayLarge, modifier = Modifier)
+            Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
+                UnderneathSpecifier(Modifier, MaterialTheme.colorScheme.tertiary, "${ recipe.prepareTime } mins")
+                UnderneathSpecifier(Modifier, MaterialTheme.colorScheme.tertiary, "${ recipe.views }k views ")
+            }
+        }
+    }
 }

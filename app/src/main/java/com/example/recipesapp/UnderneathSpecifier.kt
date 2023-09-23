@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -18,7 +19,8 @@ import androidx.compose.ui.unit.sp
 fun UnderneathSpecifier(
     modifier: Modifier,
     color: Color,
-    text: String
+    text: String,
+    fontSize: TextUnit = 12.sp,
 ) {
     Box(
         modifier = modifier.clip(RoundedCornerShape(24.dp))
@@ -30,7 +32,7 @@ fun UnderneathSpecifier(
                 .padding(horizontal = 6.dp)
         ) {
             Text(
-                fontSize = 12.sp,
+                fontSize = fontSize,
                 color = color,
                 text = text,
             )

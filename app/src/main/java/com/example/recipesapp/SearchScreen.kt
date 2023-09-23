@@ -3,7 +3,10 @@ package com.example.recipesapp
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,16 +14,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
@@ -37,10 +45,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawStyle
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.modifier.modifierLocalConsumer
@@ -53,6 +68,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.recipesapp.ui.MaterialText
 import com.example.recipesapp.ui.theme.TextBlack
+import java.lang.Float.max
 
 @Composable
 fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
@@ -77,7 +93,7 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
         SortElement("All", Sort.ALL, { viewModel.sortByName() }) { viewModel.sortByDefault() },
         SortElement("Main Course", Sort.MAIN_COURSE, { viewModel.sortByPrice() }) { viewModel.sortByDefault() },
         SortElement("Breakfast", Sort.BREAKFAST, {  viewModel.sortByTrend() }) {viewModel.sortByDefault()  },
-        SortElement("Salad %", Sort.SALAD, { viewModel.sortByPercentage() }) { viewModel.sortByDefault() }
+        SortElement("Salad", Sort.SALAD, { viewModel.sortByPercentage() }) { viewModel.sortByDefault() }
     )
     Column(modifier = Modifier
         .fillMaxWidth()
@@ -137,20 +153,25 @@ fun SearchSortBar(modifier: Modifier, sortList: List<SortElement>){
 fun SortItem(
     sortItem: SortElement,
     pickedId: MutableState<Int>,
-    colorScheme: ColorScheme // Pass the color scheme as a parameter
+    colorScheme: ColorScheme
 ) {
     Box(
         modifier = Modifier.padding(start = 12.dp),
         contentAlignment = Alignment.Center
     ) {
-        Canvas(
+        val isRectangle = sortItem.name.length * 48 > 20
+        val backgroundColor =
+            if (pickedId.value == sortItem.sortBy.ordinal) colorScheme.onSecondary
+            else colorScheme.tertiary
+
+        Box(
             modifier = Modifier
                 .size(48.dp)
-                .clip(CircleShape)
-                .background(
-                    if (pickedId.value == sortItem.sortBy.ordinal) colorScheme.onPrimary
-                    else colorScheme.onSecondary
+                .clip(
+                    if (isRectangle) RoundedCornerShape(12.dp)
+                    else CircleShape
                 )
+                .background(backgroundColor)
                 .clickable {
                     if (pickedId.value == sortItem.sortBy.ordinal) {
                         pickedId.value = -1
@@ -161,36 +182,20 @@ fun SortItem(
                     }
                 }
         ) {
-            val circleRadius = size.minDimension / 2f
-            val centerX = size.width / 2f
-            val centerY = size.height / 2f
-
-            // Draw the circle with a 1.dp line on the outside
-            drawCircle(
-                color = TextBlack,
-                center = Offset(centerX, centerY),
-                radius = circleRadius - 1.dp.toPx()
+            Text(
+                text = sortItem.name,
+                textAlign = TextAlign.Center,
+                fontSize = 32.sp,
+                color = if (pickedId.value == sortItem.sortBy.ordinal) colorScheme.tertiary
+                else colorScheme.onSecondary
             )
-
-            // Draw the text inside the circle
-            val textPaint = android.graphics.Paint().apply {
-                textSize = 12.sp.toPx() / density
-                color = if (pickedId.value == sortItem.sortBy.ordinal) colorScheme.onBackground.toArgb()
-                else colorScheme.onPrimary.toArgb()
-            }
-            val textWidth = textPaint.measureText(sortItem.name)
-            val textHeight = textPaint.fontMetrics.descent - textPaint.fontMetrics.ascent
-            drawIntoCanvas { canvas ->
-                canvas.nativeCanvas.drawText(
-                    sortItem.name,
-                    centerX - (textWidth / 2f),
-                    centerY + (textHeight / 2f) - textPaint.fontMetrics.descent,
-                    textPaint
-                )
-            }
         }
     }
 }
+
+
+
+
 
 
 @Composable
@@ -198,6 +203,37 @@ fun PickTypeBar(){
 
 }
 @Composable
+fun RecipePreviewList(meal: Meal) {
+    val scrollState = rememberLazyListState()
+    val itemCount = meal.recipies.size
+
+    LazyRow(
+        state = scrollState,
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(start = 8.dp, end = 8.dp)
+    ) {
+        itemsIndexed(meal.recipies) { index, recipe ->
+            val itemSize by animateDpAsState(
+                targetValue = if (index == scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.index) 120.dp else 80.dp,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioLowBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            )
+
+            RecipePreviewItem(
+                recipe = recipe,
+                true
+/*                size = itemSize,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
+            */)
+        }
+    }
+}
+
+/*@Composable
 fun RecipePreviewList(meal: Meal) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -215,26 +251,65 @@ fun RecipePreviewList(meal: Meal) {
             }
 
     }
-}
+}*/
 @Composable
-fun RecipePreviewItem(recipe: RecipePreview){
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 16.dp)) {
+fun RecipePreviewItem(
+    recipe: RecipePreview,
+    isFocused: Boolean
+) {
+    val targetSize = if (isFocused) 1f else 0.7f // Adjust the scaling factor as needed
+    val alpha = if (isFocused) 1f else 0.7f // Adjust the alpha for fading effect
 
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(top = 16.dp)
+    ) {
+        // Add any content you want above the image here.
     }
-    Box( modifier = Modifier.clip(
-        RoundedCornerShape(12.dp))
-        .size(width = 200.dp, height = 500.dp)){
-        Image(bitmap = recipe.image, contentDescription = null, modifier = Modifier.clip(
-            RoundedCornerShape(12.dp)
-        ))
+    Box(
+        modifier = Modifier
+            .size(width = 270.dp, height = 480.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .graphicsLayer(
+                scaleX = animateFloatAsState(targetValue = targetSize).value,
+                scaleY = animateFloatAsState(targetValue = targetSize).value,
+                alpha = animateFloatAsState(targetValue = alpha).value
+            )
+    ) {
+        Image(
+            bitmap = recipe.image,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(12.dp))
+        )
         Column(
-            verticalArrangement = Arrangement.Bottom, // Align the Column to the bottom
-            modifier = Modifier.fillMaxHeight()) {
-
-            MaterialText(recipe.name, textAlign = TextAlign.Center, textStyle = MaterialTheme.typography.displayLarge, modifier = Modifier)
-            Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
-                UnderneathSpecifier(Modifier, MaterialTheme.colorScheme.tertiary, "${ recipe.prepareTime } mins")
-                UnderneathSpecifier(Modifier, MaterialTheme.colorScheme.tertiary, "${ recipe.views }k views ")
+            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier.fillMaxHeight()
+        ) {
+            MaterialText(
+                text = recipe.name,
+                textAlign = TextAlign.Center,
+                textStyle = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            Row(
+                horizontalArrangement = Arrangement.SpaceAround,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                UnderneathSpecifier(
+                    modifier = Modifier,
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    text = "${recipe.prepareTime} mins",
+                    fontSize = 16.sp
+                )
+                UnderneathSpecifier(
+                    modifier = Modifier,
+                    color = MaterialTheme.colorScheme.onSecondary,
+                    text = "${recipe.views}k views",
+                    fontSize = 16.sp
+                )
             }
         }
     }

@@ -38,11 +38,17 @@ class MainActivity : ComponentActivity() {
             return SearchViewModel() as T
         }
     }
+    class MainViewModelFactory() : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return MainViewModel() as T
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModelMap[Screen.UserScreen] = ViewModelProvider(this,UserViewModelFactory())[UserViewModel::class.java]
         viewModelMap[Screen.FavoriteScreen] = ViewModelProvider(this,FavoriteViewModelFactory())[FavoriteViewModel::class.java]
         viewModelMap[Screen.SearchScreen] = ViewModelProvider(this,SearchViewModelFactory())[SearchViewModel::class.java]
+        viewModelMap[Screen.MainScreen] = ViewModelProvider(this,MainViewModelFactory())[MainViewModel::class.java]
 
         setContent {
             RecipesAppTheme {

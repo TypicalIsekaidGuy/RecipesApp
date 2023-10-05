@@ -42,6 +42,15 @@ val Typography = Typography(
         fontFamily = firaSansFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
+        lineHeight = 48.sp,
+        letterSpacing = 0.5.sp,
+        color = TextBlack,
+        textAlign = TextAlign.Left
+    ),
+    labelSmall = TextStyle(
+        fontFamily = firaSansFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp,
         color = TextBlack,

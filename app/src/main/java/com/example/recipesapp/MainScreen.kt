@@ -24,10 +24,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -141,10 +147,11 @@ fun MainTopBar(goBackToScreen: ()-> Unit){
 }
 @Composable
 fun ClarificationBar(servings: Int, viewModel: MainViewModel){
+
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround){
         ServingsClarification(servings, viewModel)
-        DetailsClarification("Preparation", "5 mins")
-        DetailsClarification("Cook", "20 mins")
+        DetailsClarification("Preparation", viewModel.strTotalPrepTime)
+        DetailsClarification("Cook", viewModel.strTotalCookTime)
     }
 }
 @Composable
@@ -157,59 +164,51 @@ fun ServingsClarification(servings: Int, viewModel: MainViewModel){
     }
 }
 @Composable
-fun PlusMinusButton(servings: Int, decrease: ()-> Unit, increase: ()-> Unit, ){
-    Box{
-        Box(modifier = Modifier
-            .padding(vertical = 6.dp)
-            .padding(start = 16.dp)){
-            Box(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.secondary, shape = CircleShape)
-                    .padding(vertical = 6.dp, horizontal = 30.dp)
+fun PlusMinusButton(servings: Int, onDecrease: () -> Unit, onIncrease: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.secondary, shape = CircleShape)
+    ) {
+        Row(
+            modifier = Modifier,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = { onIncrease() }
             ) {
-                MaterialText(
-                    text = servings.toString(),
-                    textStyle = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(14.dp)
                 )
             }
-        }
 
-        Box(modifier = Modifier
-            .padding(vertical = 6.dp)
-            .clickable {
-                increase()
-            }){
-            Box(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
-                    .padding(start = 8.dp)
+            Text(
+                text = servings.toString(),
+                color = MaterialTheme.colorScheme.tertiary,
+                fontSize = when {
+                    servings < 10 -> 20.sp
+                    servings < 100 -> 18.sp
+                    else -> 16.sp
+                }
+            )
+
+            IconButton(
+                onClick = { onDecrease() }
             ) {
-                MaterialText(
-                    text = "-",
-                    textStyle = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier
-                )
-            }
-        }
-        Box(modifier = Modifier
-            .padding(start = (52 + (servings - 1) * 1).dp)
-            .padding(vertical = 6.dp)
-            .clickable { decrease() }){
-            Box(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
-                    .padding(vertical = 6.dp, horizontal = 15.dp)
-            ) {
-                MaterialText(
-                    text = "+",
-                    textStyle = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(14.dp)
                 )
             }
         }
     }
 }
+
 @Composable
 fun DetailsClarification(name: String, time: String){
     Column(modifier = Modifier) {
@@ -218,7 +217,7 @@ fun DetailsClarification(name: String, time: String){
             textStyle = MaterialTheme.typography.headlineMedium)
         MaterialText(text = time,
             modifier = Modifier.padding(top = 12.dp).align(Alignment.CenterHorizontally),
-            textStyle = MaterialTheme.typography.headlineSmall)
+            textStyle = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
 
     }
 }

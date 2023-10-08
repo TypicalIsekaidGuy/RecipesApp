@@ -44,25 +44,26 @@ import com.example.recipesapp.ui.MaterialText
 
 @Composable
 fun UserScreen(navController: NavController, userViewModel: UserViewModel){
-    val isLoginScreen = remember { mutableStateOf(true) }
-    val login = remember{ mutableStateOf("") }
-    val password = remember{ mutableStateOf("") }
-    val name = remember{ mutableStateOf("") }
     Column(modifier = Modifier
         .fillMaxWidth()
-        .padding(horizontal = 24.dp), horizontalAlignment = Alignment.CenterHorizontally,
+        .padding(horizontal = 24.dp).padding(top = 32.dp), horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)) {
             TopUserBar()
-            EditTextLine(modifier = Modifier, text = login.value, onTextChanged = {login.value = it}, hint = "Login")
-            EditTextLine(modifier = Modifier, text = password.value, onTextChanged = {password.value = it}, hint = "Password")
-            EditTextLine(modifier = Modifier, text = name.value, onTextChanged = {name.value = it}, hint = "Name")
+            EditTextLine(modifier = Modifier, text = userViewModel.login.value, onTextChanged = {userViewModel.login.value = it}, hint = "Login")
+            EditTextLine(modifier = Modifier, text = userViewModel.password.value, onTextChanged = {userViewModel.password.value = it}, hint = "Password")
+            if(userViewModel.isLoginScreen.value){
+                EditTextLine(modifier = Modifier, text = userViewModel.name.value, onTextChanged = {userViewModel.name.value = it}, hint = "Name")
+            }
 
         }
         Column(verticalArrangement = Arrangement.spacedBy(8.dp),horizontalAlignment = Alignment.CenterHorizontally,){
-            ConfirmButton()
-            SearchOrLoginLine(isLoginScreen)
+            ConfirmButton {
+                userViewModel.confirmAuth()
+                navController.navigate(Screen.SearchScreen.route)
+            }
+            SearchOrLoginLine(userViewModel.isLoginScreen)
         }
     }
 }
@@ -76,13 +77,13 @@ fun TopUserBar(){
     )
 }
 @Composable
-fun ConfirmButton(){
+fun ConfirmButton(confirmAuth: () -> Unit) {
     Box(modifier = Modifier
         .clip(RoundedCornerShape(4.dp))
         .background(MaterialTheme.colorScheme.secondary)
         .height(48.dp)
         .width(256.dp)
-        .clickable { }){
+        .clickable { confirmAuth() }){
 
         MaterialText("Confirm", MaterialTheme.typography.headlineMedium, modifier = Modifier
             .fillMaxWidth()
@@ -98,14 +99,14 @@ fun SearchOrLoginLine(isLoginScreen: MutableState<Boolean>){
 
         Box(modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
-            .clickable { isLoginScreen.value = true }){
+            .clickable { isLoginScreen.value = false }){
 
             MaterialText("Log in", MaterialTheme.typography.headlineSmall, modifier = Modifier, textAlign = TextAlign.Center)
         }
         Box(modifier = Modifier
             .padding(end = 4.dp, start = 4.dp)
             .clip(CircleShape)
-            .clickable { isLoginScreen.value = false }){
+            .clickable { isLoginScreen.value = true }){
 
             MaterialText("Create account", MaterialTheme.typography.headlineSmall, modifier = Modifier, textAlign = TextAlign.Center)
         }

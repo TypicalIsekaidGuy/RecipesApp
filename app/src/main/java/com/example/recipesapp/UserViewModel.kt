@@ -14,6 +14,16 @@ class UserViewModel(private val authRepository: AuthRepository): ViewModel() {
     val name = mutableStateOf("")
     private val bannedWords = mutableListOf("fuck")
 
+    private val _recipies = mutableListOf<String>()
+    val recipies = _recipies
+
+    init {
+        fetchAllRecipies()
+    }
+    private fun fetchAllRecipies(){
+
+    }
+
     fun confirmAuth(){
         try{
             isLoginCorrect()

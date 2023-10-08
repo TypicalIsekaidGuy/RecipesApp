@@ -13,7 +13,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class FavoriteViewModel: ViewModel() {
+class FavoriteViewModel(authRepository: AuthRepository): ViewModel() {
 
 
 

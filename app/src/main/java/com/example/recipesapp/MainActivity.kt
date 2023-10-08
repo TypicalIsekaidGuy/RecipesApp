@@ -9,19 +9,20 @@ import com.example.recipesapp.ui.theme.RecipesAppTheme
 
 class MainActivity : ComponentActivity() {
     var viewModelMap: HashMap<Screen, ViewModel> = HashMap()
+    private val authRepository: AuthRepository = AuthRepository()
     class UserViewModelFactory(private val authRepository: AuthRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return UserViewModel(authRepository) as T
         }
     }
-    class FavoriteViewModelFactory() : ViewModelProvider.Factory {
+    class FavoriteViewModelFactory(private val authRepository: AuthRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return FavoriteViewModel() as T
+            return FavoriteViewModel(authRepository) as T
         }
     }
-    class SearchViewModelFactory() : ViewModelProvider.Factory {
+    class SearchViewModelFactory(private val authRepository: AuthRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return SearchViewModel() as T
+            return SearchViewModel(authRepository) as T
         }
     }
     class MainViewModelFactory() : ViewModelProvider.Factory {
@@ -31,9 +32,9 @@ class MainActivity : ComponentActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModelMap[Screen.UserScreen] = ViewModelProvider(this,UserViewModelFactory(AuthRepository()))[UserViewModel::class.java]
-        viewModelMap[Screen.FavoriteScreen] = ViewModelProvider(this,FavoriteViewModelFactory())[FavoriteViewModel::class.java]
-        viewModelMap[Screen.SearchScreen] = ViewModelProvider(this,SearchViewModelFactory())[SearchViewModel::class.java]
+        viewModelMap[Screen.UserScreen] = ViewModelProvider(this,UserViewModelFactory(authRepository))[UserViewModel::class.java]
+        viewModelMap[Screen.FavoriteScreen] = ViewModelProvider(this,FavoriteViewModelFactory(authRepository))[FavoriteViewModel::class.java]
+        viewModelMap[Screen.SearchScreen] = ViewModelProvider(this,SearchViewModelFactory(authRepository))[SearchViewModel::class.java]
         viewModelMap[Screen.MainScreen] = ViewModelProvider(this,MainViewModelFactory())[MainViewModel::class.java]
 
         setContent {

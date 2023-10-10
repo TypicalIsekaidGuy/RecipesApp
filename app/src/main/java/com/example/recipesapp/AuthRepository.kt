@@ -16,6 +16,12 @@ class AuthRepository() {
 
     private fun currentUser() = auth.currentUser
 
+    fun checkUser(): Boolean{
+        if (currentUser()!=null)
+            return true
+        return false
+    }
+
     // Function to sign in with email and password
     fun signInWithEmailAndPassword(
         email: String,

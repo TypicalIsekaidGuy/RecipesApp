@@ -6,6 +6,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +23,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
@@ -45,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.viewpager.widget.PagerAdapter
 import com.example.recipesapp.ui.MaterialText
 
 @Composable
@@ -181,34 +185,24 @@ fun SortItem(
 fun PickTypeBar(){
 
 }
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RecipePreviewList(meal: Meal) {
     val scrollState = rememberLazyListState()
     val itemCount = meal.recipies.size
 
-    LazyRow(
-        state = scrollState,
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 8.dp, end = 8.dp)
-    ) {
-        itemsIndexed(meal.recipies) { index, recipe ->
-            val itemSize by animateDpAsState(
-                targetValue = if (index == scrollState.layoutInfo.visibleItemsInfo.firstOrNull()?.index) 120.dp else 80.dp,
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioLowBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            )
+    val pagerState = rememberPagerState()
+    HorizontalPager(pageCount = itemCount,//make it animated like in tutorial
+        state = pagerState) {
+            page ->
 
-            RecipePreviewItem(
-                recipe = recipe,
-                true
-/*                size = itemSize,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp)
-            */)
-        }
+        RecipePreviewItem(
+            recipe = meal.recipies[page]
+            /*                size = itemSize,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(4.dp)
+                        */)
     }
 }
 
@@ -231,29 +225,21 @@ fun RecipePreviewList(meal: Meal) {
 
     }
 }*/
+
 @Composable
 fun RecipePreviewItem(
-    recipe: RecipePreview,
-    isFocused: Boolean
+    recipe: RecipePreview
 ) {
-    val targetSize = if (isFocused) 1f else 0.7f // Adjust the scaling factor as needed
-    val alpha = if (isFocused) 1f else 0.7f // Adjust the alpha for fading effect
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.padding(top = 16.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Add any content you want above the image here.
     }
     Box(
         modifier = Modifier
-            .size(width = 270.dp, height = 480.dp)
+            .size(width = 360.dp, height = 640.dp)
             .clip(RoundedCornerShape(12.dp))
-            .graphicsLayer(
-                scaleX = animateFloatAsState(targetValue = targetSize).value,
-                scaleY = animateFloatAsState(targetValue = targetSize).value,
-                alpha = animateFloatAsState(targetValue = alpha).value
-            )
     ) {
         Image(
             bitmap = recipe.image,
@@ -266,7 +252,7 @@ fun RecipePreviewItem(
             verticalArrangement = Arrangement.Bottom,
             modifier = Modifier.fillMaxHeight()
         ) {
-            MaterialText(
+            MaterialText(//find solution to overcrossed text problem
                 text = recipe.name,
                 textAlign = TextAlign.Center,
                 textStyle = MaterialTheme.typography.headlineMedium,

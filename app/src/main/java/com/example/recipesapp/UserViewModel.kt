@@ -13,12 +13,18 @@ class UserViewModel(private val authRepository: AuthRepository): ViewModel() {
     val password = mutableStateOf("")
     val name = mutableStateOf("")
     private val bannedWords = mutableListOf("fuck")
+    val isUserInitialized =  mutableStateOf(false)
+
 
     private val _recipies = mutableListOf<String>()
     val recipies = _recipies
 
     init {
+       isUserInitialized.value =  authRepository.checkUser()//make splashScreen and check it there
         fetchAllRecipies()
+    }
+    private fun tryEnterApp(){
+
     }
     private fun fetchAllRecipies(){
 

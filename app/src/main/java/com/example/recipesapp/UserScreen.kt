@@ -39,6 +39,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.recipesapp.ui.MaterialText
 
@@ -46,7 +47,8 @@ import com.example.recipesapp.ui.MaterialText
 fun UserScreen(navController: NavController, userViewModel: UserViewModel){
     Column(modifier = Modifier
         .fillMaxWidth()
-        .padding(horizontal = 24.dp).padding(top = 32.dp), horizontalAlignment = Alignment.CenterHorizontally,
+        .padding(horizontal = 24.dp)
+        .padding(top = 32.dp), horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)) {
@@ -66,6 +68,11 @@ fun UserScreen(navController: NavController, userViewModel: UserViewModel){
             SearchOrLoginLine(userViewModel.isLoginScreen)
         }
     }
+    enterAppAuto(userViewModel.isUserInitialized.value, navController)//create corutine scope next
+}
+fun enterAppAuto(isUserInitialized: Boolean, navController: NavController){
+    if(isUserInitialized)
+        navController.navigate(Screen.SearchScreen.route)
 }
 @Composable
 fun TopUserBar(){

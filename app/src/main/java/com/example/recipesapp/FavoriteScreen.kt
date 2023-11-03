@@ -52,10 +52,15 @@ fun FavoriteScreen(controller: NavHostController, viewModel: FavoriteViewModel){
     val imageBitmap: ImageBitmap = bitmap.asImageBitmap()
 
 
+    val list_ingridients = listOf<Ingridient>(
+        Ingridient("pepper".hashCode(),"pepper",0.5f,true),
+        Ingridient("peppe".hashCode(),"peppe",0.5f,true),
+        Ingridient("pepp".hashCode(),"pepp",0.5f,true)
+    )
     val list = mutableListOf(
-        RecipePreview("Vegan Mix Vegetable Ceaser Salad",imageBitmap,20,140, true ),
-        RecipePreview("Vegan Mix Vegetable Ceaser Salad",imageBitmap,20,140, true ),
-        RecipePreview("Vegan Mix Vegetable Ceaser Salad",imageBitmap,20,140, true )
+        Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"","Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients),
+        Recipe("Vegan Mix Vegetable ".hashCode(),"","Vegan Mix Vegetable ",imageBitmap,20,140, "salad",list_ingridients),
+        Recipe("Vegan Mix  Ceaser".hashCode(),"","Vegan Mix  Ceaser",imageBitmap,20,140, "salad",list_ingridients),
     )
     val meals = mutableListOf(
         Meal("Salad",list),
@@ -160,7 +165,7 @@ fun MealSlideItem(meal: Meal) {
 }
 }
 @Composable
-fun MealItem(recipe: RecipePreview){
+fun MealItem(recipe: Recipe){
     Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 16.dp)) {
         Box( modifier = Modifier.clip(
             RoundedCornerShape(12.dp)

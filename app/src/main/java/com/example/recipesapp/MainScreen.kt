@@ -61,7 +61,13 @@ fun MainScreen(controller: NavHostController, viewModel: MainViewModel) {
     val bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, imageResource)
     val imageBitmap: ImageBitmap = bitmap.asImageBitmap()
 
-    val recipe = RecipePreview("Vegan Mix Vegetable Ceaser Salad",imageBitmap,20,140, true )
+
+    val list_ingridients = listOf<Ingridient>(
+        Ingridient("pepper".hashCode(),"pepper",0.5f,true),
+        Ingridient("peppe".hashCode(),"peppe",0.5f,true),
+        Ingridient("pepp".hashCode(),"pepp",0.5f,true)
+    )
+    val recipe =         Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"","Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients)
     val servings by viewModel.servings
     LazyColumn(modifier = Modifier
         .fillMaxWidth()) {

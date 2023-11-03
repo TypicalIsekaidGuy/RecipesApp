@@ -3,8 +3,7 @@ package com.example.recipesapp
 data class SortElement(
     val name: String,
     val sortBy: Sort,
-    val onClick: () -> Unit,
-    val onClickDefault: () -> Unit
+    val onClick: () -> Unit
 )
 enum class Sort{
     ALL,

@@ -11,7 +11,7 @@ import androidx.navigation.navArgument
 @Composable
 fun Navigation(viewModels: HashMap<Screen, ViewModel>){
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.UserScreen.route/*+ "/name/10F" */){
+    NavHost(navController = navController, startDestination = Screen.SearchScreen.route/*+ "/name/10F" */){
         composable(route = Screen.FavoriteScreen.route){
             FavoriteScreen(navController, viewModels[Screen.FavoriteScreen] as FavoriteViewModel)
         }

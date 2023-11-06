@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import java.io.ByteArrayOutputStream
@@ -20,6 +21,7 @@ class AuthRepository() {
     private val auth: FirebaseAuth by lazy {
         FirebaseAuth.getInstance()
     }
+    private val firebaseData = Firebase.database("https://recipiesapp-b482b-default-rtdb.europe-west1.firebasedatabase.app/").reference
 
     fun logout() = auth.signOut()
 
@@ -101,16 +103,13 @@ class AuthRepository() {
     }*/
 
     fun load_to_db(recipe: Recipe) {
-        val firebaseData = Firebase.database.reference
-        val key = firebaseData.child("recipes").push().key
-        recipe.uuid = key!!
-        firebaseData.child("recipes").child(key).setValue(recipe)
+        saveRecipeToDatabase(recipe)
+        Log.d(TAG, firebaseData.child("sss").root.toString())
     }
     fun saveRecipeToDatabase(recipe: Recipe) {
-        val firebaseData = Firebase.database.reference
         val recipeMap = mutableMapOf<String, Any>()
-
         recipeMap["id"] = recipe.id
+
         recipeMap["uuid"] = recipe.uuid
         recipeMap["name"] = recipe.name
         recipeMap["prepareTime"] = recipe.prepareTime
@@ -134,12 +133,13 @@ class AuthRepository() {
         recipeMap["ingredients"] = ingredientsList
 */
 
+        recipeMap["id"] = recipe.id
+        val recip = mutableMapOf<String, Any>()
+        recip[recipe.name] = recipeMap
         // Push the recipe data to the "recipes" node in Firebase
-        val recipeKey = firebaseData.child("recipes").push().key
         try {
-            recipeKey?.let {
-                firebaseData.child("recipes").setValue("recipeMap")
-            }
+                firebaseData.child("recipes").setValue(recip)
+
         }
         catch (e: Exception){
             Log.d(TAG,e.message!!)

@@ -86,9 +86,7 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
         Recipe("Vegan Mix Vegetable ".hashCode(),"","Vegan Mix Vegetable ",imageBitmap,20,140, "salad",list_ingridients),
         Recipe("Vegan Mix  Ceaser".hashCode(),"","Vegan Mix  Ceaser",imageBitmap,20,140, "salad",list_ingridients),
     )
-/*
     viewModel.load(list)
-*/
     val meals = mutableListOf(
         Meal("Salad",list),
         Meal("Cherry",list),

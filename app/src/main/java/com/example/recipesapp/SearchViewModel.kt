@@ -3,24 +3,22 @@ package com.example.recipesapp
 import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class SearchViewModel(val authRepository: AuthRepository): ViewModel() {
     val TAG = "SearchViewModel"
 
-    private val list_ingridients = listOf<Ingridient>(
-        Ingridient("pepper".hashCode(),"pepper",0.5f,true),
-        Ingridient("peppe".hashCode(),"peppe",0.5f,true),
-        Ingridient("pepp".hashCode(),"pepp",0.5f,true)
-    )
-    var imageBitmap = ImageBitmap(20,20)
-    var _data = MutableStateFlow(
-        mutableListOf(
-            Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"","Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients),
-            Recipe("Vegan Mix Vegetable ".hashCode(),"","Vegan Mix Vegetable ",imageBitmap,20,140, "salad",list_ingridients),
-            Recipe("Vegan Mix  Ceaser".hashCode(),"","Vegan Mix  Ceaser",imageBitmap,20,140, "salad",list_ingridients),
-        ))
+    init {
+        get_data()
+    }
+
+    private val _data = MutableStateFlow<List<Recipe>>(emptyList())
+    val data: StateFlow<List<Recipe>> = _data
+
 
     private val _searchText = MutableStateFlow("")
     val searchText = _searchText.asStateFlow()
@@ -52,6 +50,17 @@ class SearchViewModel(val authRepository: AuthRepository): ViewModel() {
         }
     }
     fun load(list : List<Recipe>){
-        authRepository.load_to_db(list[0])
+        authRepository.saveRecipeToDatabase(list)
+    }
+    private fun get_data() {
+        viewModelScope.launch {
+            try {
+                val recipes = authRepository.getRecipesFromDatabase()
+                _data.value = recipes
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Handle any errors, e.g., show an error message or log the exception.
+            }
+        }
     }
 }

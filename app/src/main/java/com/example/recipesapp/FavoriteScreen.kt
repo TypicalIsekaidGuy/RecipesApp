@@ -52,15 +52,15 @@ fun FavoriteScreen(controller: NavHostController, viewModel: FavoriteViewModel){
     val imageBitmap: ImageBitmap = bitmap.asImageBitmap()
 
 
-    val list_ingridients = listOf<Ingridient>(
-        Ingridient("pepper".hashCode(),"pepper",0.5f,true),
-        Ingridient("peppe".hashCode(),"peppe",0.5f,true),
-        Ingridient("pepp".hashCode(),"pepp",0.5f,true)
+    val list_ingridients = listOf<Ingredient>(
+        Ingredient("pepper".hashCode(),"pepper",0.5f,true),
+        Ingredient("peppe".hashCode(),"peppe",0.5f,true),
+        Ingredient("pepp".hashCode(),"pepp",0.5f,true)
     )
     val list = mutableListOf(
-        Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"","Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients),
-        Recipe("Vegan Mix Vegetable ".hashCode(),"","Vegan Mix Vegetable ",imageBitmap,20,140, "salad",list_ingridients),
-        Recipe("Vegan Mix  Ceaser".hashCode(),"","Vegan Mix  Ceaser",imageBitmap,20,140, "salad",list_ingridients),
+        Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done"),
+        Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done"),
+        Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done"),
     )
     val meals = mutableListOf(
         Meal("Salad",list),

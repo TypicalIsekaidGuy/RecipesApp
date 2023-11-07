@@ -7,11 +7,11 @@ import androidx.compose.ui.res.imageResource
 
 data class Recipe(
     val id: Int = 0,
-    var uuid: String = "",
     val name: String= "",
     var image: ImageBitmap,
     val prepareTime: Int = 1,
-    val views :Int = 0,
+    val views :Int = 1,
     val meal: String= "",
-    val ingridients: List<Ingridient> = emptyList()
+    val ingridients: List<Ingredient> = emptyList(),
+    val description: String = ""
 )

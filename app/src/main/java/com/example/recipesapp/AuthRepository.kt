@@ -1,18 +1,21 @@
 package com.example.recipesapp
 
-import android.R.attr.bitmap
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
-import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
 
@@ -21,6 +24,7 @@ class AuthRepository() {
     private val auth: FirebaseAuth by lazy {
         FirebaseAuth.getInstance()
     }
+    private val recipes = mutableListOf<Recipe>()
     private val firebaseData = Firebase.database("https://recipiesapp-b482b-default-rtdb.europe-west1.firebasedatabase.app/").reference
 
     fun logout() = auth.signOut()
@@ -102,48 +106,92 @@ class AuthRepository() {
         })
     }*/
 
-    fun load_to_db(recipe: Recipe) {
-        saveRecipeToDatabase(recipe)
-        Log.d(TAG, firebaseData.child("sss").root.toString())
+
+    fun saveRecipeToDatabase(recipes: List<Recipe>) {
+        for (recipe in recipes){
+
+            val recipeMap = mutableMapOf<String, Any>()
+            recipeMap["id"] = recipe.id
+            recipeMap["name"] = recipe.name
+            recipeMap["prepareTime"] = recipe.prepareTime
+            recipeMap["views"] = recipe.views
+            recipeMap["meal"] = recipe.meal
+            recipeMap["description"] = recipe.description
+
+            // Convert the ImageBitmap to a format that can be saved to Firebase (e.g., base64)
+            val imageBase64 = convertImageBitmapToBase64(recipe.image)
+            recipeMap["image"] = imageBase64
+
+            // Convert the list of ingredients to a list of maps
+            var ingredientsList = mutableMapOf<String,Any>()
+            for (ingredient in recipe.ingridients){
+                var ingredientMap = mutableMapOf<String,Any>()
+                ingredientMap["id"] = ingredient.id
+                ingredientMap["name"] = ingredient.name
+                ingredientMap["quantity"] = ingredient.quantity
+                ingredientMap["isWeightable"] = ingredient.isWeightable
+                ingredientsList[ingredient.name] = ingredientMap
+            }
+            recipeMap["ingredients"] = ingredientsList
+            val recip = mutableMapOf<String, Any>()
+            recip[recipe.name] = recipeMap
+            // Push the recipe data to the "recipes" node in Firebase
+            try {
+                firebaseData.child("recipes").updateChildren(recip)
+            }
+            catch (e: Exception){
+                Log.d(TAG,e.message!!)
+            }
+        }
     }
-    fun saveRecipeToDatabase(recipe: Recipe) {
-        val recipeMap = mutableMapOf<String, Any>()
-        recipeMap["id"] = recipe.id
+    fun getRecipesFromDatabase(): List<Recipe>{
+        val db = firebaseData.child("recipes").get().addOnSuccessListener{
+            if(it.exists()){
+                for(children in it.children){
+                    try{
+                        val recipeMap = children.value as Map<String, Any>
 
-        recipeMap["uuid"] = recipe.uuid
-        recipeMap["name"] = recipe.name
-        recipeMap["prepareTime"] = recipe.prepareTime
-        recipeMap["views"] = recipe.views
-        recipeMap["meal"] = recipe.meal
+                        // Extract data from the recipeMap
+                        val id = recipeMap["id"] as Long
+                        val name = recipeMap["name"] as String
+                        val image = convertBase64ToImageBitmap(recipeMap["image"] as String)
+                        val prepareTime = recipeMap["prepareTime"] as Long
+                        val views = recipeMap["views"] as Long
+                        val meal = recipeMap["meal"] as String
+                        val description = recipeMap["description"] as String
+                        val ingredientsMap: Map<String, Map<String, Any>> = recipeMap["ingredients"]!! as Map<String, Map<String, Any>>
 
-        // Convert the ImageBitmap to a format that can be saved to Firebase (e.g., base64)
-        val imageBase64 = convertImageBitmapToBase64(recipe.image)
-/*        recipeMap["image"] = imageBase64*/
+                        Log.d(TAG,"INGRIDIENTS" + ingredientsMap.toString())
+                        var ingredientsList = emptyList<Ingredient>()
+                        if (ingredientsMap != null) {
+                            ingredientsList = ingredientsMap.map { (ingredientName, ingredientData) ->
+                                val id = (ingredientData["id"] as Long).toInt()
+                                val name = ingredientData["name"] as String
+                                val quantity = /*(ingredientData["quantity"] as Long).toFloat()*/0F
+                                val isWeightable = ingredientData["isWeightable"] as Boolean
 
-        // Convert the list of ingredients to a list of maps
-        val ingredientsList = recipe.ingridients.map { ingredient ->
-            val ingredientMap = mutableMapOf<String, Any>()
-            ingredientMap["id"] = ingredient.id
-            ingredientMap["name"] = ingredient.name
-            ingredientMap["quantity"] = ingredient.quantity
-            ingredientMap["isWeightable"] = ingredient.isWeightable
-            ingredientMap
+                                Ingredient(id, name, quantity, isWeightable)
+                            }
+                            // Now 'ingredientsList' contains the list of Ingredient objects
+                        } else {
+                            Log.d(TAG,"HUYNYA")
+                        }
+
+                        // Process the data, create Recipe objects, or perform any other operations as needed
+                        val recipe = Recipe(id.toInt(), name, image!!, prepareTime.toInt(), views.toInt(), meal, ingredientsList, description)
+                        recipes.add(recipe)
+                        Log.d(TAG,recipe.toString())
+
+                    }
+                    catch (e:Exception){
+                        Log.d(TAG,e.message.toString())
+                        e.printStackTrace()
+                    }
+                }
+            }
         }
-/*
-        recipeMap["ingredients"] = ingredientsList
-*/
 
-        recipeMap["id"] = recipe.id
-        val recip = mutableMapOf<String, Any>()
-        recip[recipe.name] = recipeMap
-        // Push the recipe data to the "recipes" node in Firebase
-        try {
-                firebaseData.child("recipes").setValue(recip)
-
-        }
-        catch (e: Exception){
-            Log.d(TAG,e.message!!)
-        }
+        return recipes
     }
 
     // Helper function to convert ImageBitmap to base64 (implement this)
@@ -154,6 +202,13 @@ class AuthRepository() {
         bm.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val b = baos.toByteArray()
         return Base64.encodeToString(b, Base64.DEFAULT)!!
+    }
+    private fun convertBase64ToImageBitmap(base64String: String): ImageBitmap? {
+
+            val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+            val bitmap = BitmapFactory.decodeStream(ByteArrayInputStream(imageBytes))
+            return bitmap.asImageBitmap()
+
     }
 
 

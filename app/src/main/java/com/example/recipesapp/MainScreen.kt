@@ -26,10 +26,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -62,12 +60,12 @@ fun MainScreen(controller: NavHostController, viewModel: MainViewModel) {
     val imageBitmap: ImageBitmap = bitmap.asImageBitmap()
 
 
-    val list_ingridients = listOf<Ingridient>(
-        Ingridient("pepper".hashCode(),"pepper",0.5f,true),
-        Ingridient("peppe".hashCode(),"peppe",0.5f,true),
-        Ingridient("pepp".hashCode(),"pepp",0.5f,true)
+    val list_ingridients = listOf<Ingredient>(
+        Ingredient("pepper".hashCode(),"pepper",0.5f,true),
+        Ingredient("peppe".hashCode(),"peppe",0.5f,true),
+        Ingredient("pepp".hashCode(),"pepp",0.5f,true)
     )
-    val recipe =         Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"","Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients)
+    val recipe =         Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done")
     val servings by viewModel.servings
     LazyColumn(modifier = Modifier
         .fillMaxWidth()) {

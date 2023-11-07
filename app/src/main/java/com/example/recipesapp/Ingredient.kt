@@ -1,6 +1,6 @@
 package com.example.recipesapp
 
-data class Ingridient (
+data class Ingredient (
     val id: Int,
     val name: String,
     var quantity: Float,

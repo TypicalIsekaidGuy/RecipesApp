@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -65,9 +66,9 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
     val context = LocalContext.current
     val bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, imageResource)
     val imageBitmap: ImageBitmap = bitmap.asImageBitmap()
-    val recipes = viewModel._data.collectAsState()
+    val recipes = viewModel.data.collectAsState()
     for (i in recipes.value) {
-        i.image = imageBitmap
+        Log.d("TAG",i.image.toString())
     }
 
     val selectorState = mutableStateOf(false)
@@ -76,22 +77,262 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
     val searchText = viewModel.searchText
     val isSearching by viewModel.isSearching.collectAsState()
 
-    val list_ingridients = listOf<Ingridient>(
-        Ingridient("pepper".hashCode(),"pepper",0.5f,true),
-        Ingridient("peppe".hashCode(),"peppe",0.5f,true),
-        Ingridient("pepp".hashCode(),"pepp",0.5f,true)
+/*    val list_ingredients1 = listOf<Ingredient>(
+        Ingredient("Lettuce".hashCode(), "Lettuce", 2.0f, true),
+        Ingredient("Cucumbers".hashCode(), "Cucumbers", 1.0f, true),
+        Ingredient("Tomatoes".hashCode(), "Tomatoes", 2.0f, true),
+        Ingredient("Bell Peppers".hashCode(), "Bell Peppers", 1.0f, true),
+        Ingredient("Red Onions".hashCode(), "Red Onions", 0.5f, true),
+        Ingredient("Olive Oil".hashCode(), "Olive Oil", 0.25f, true),
+        Ingredient("Vinegar".hashCode(), "Vinegar", 0.1f, true),
+        Ingredient("Salt".hashCode(), "Salt", 0.05f, true),
+        Ingredient("Pepper".hashCode(), "Pepper", 0.02f, true)
     )
+    val list_ingredients2 = listOf(
+        Ingredient("Spaghetti".hashCode(), "Spaghetti", 200.0f, true),
+        Ingredient("Eggs".hashCode(), "Eggs", 2.0f, true),
+        Ingredient("Bacon".hashCode(), "Bacon", 150.0f, true),
+        Ingredient("Parmesan Cheese".hashCode(), "Parmesan Cheese", 0.2f, true),
+        Ingredient("Black Pepper".hashCode(), "Black Pepper", 0.05f, true),
+        Ingredient("Olive Oil".hashCode(), "Olive Oil", 0.1f, true),
+        Ingredient("Salt".hashCode(), "Salt", 0.05f, true),
+    )
+    val list_ingredients3 = listOf(
+        Ingredient("Chicken Breast".hashCode(), "Chicken Breast", 2.0f, true),
+        Ingredient("Lettuce".hashCode(), "Lettuce", 2.0f, true),
+        Ingredient("Tomatoes".hashCode(), "Tomatoes", 2.0f, true),
+        Ingredient("Cucumbers".hashCode(), "Cucumbers", 1.0f, true),
+        Ingredient("Red Onions".hashCode(), "Red Onions", 0.5f, true),
+        Ingredient("Olive Oil".hashCode(), "Olive Oil", 0.25f, true),
+        Ingredient("Lemon Juice".hashCode(), "Lemon Juice", 0.1f, true),
+        Ingredient("Salt".hashCode(), "Salt", 0.05f, true),
+        Ingredient("Black Pepper".hashCode(), "Black Pepper", 0.02f, true)
+    )
+    val list_ingredients4 = listOf(
+        Ingredient("Arborio Rice".hashCode(), "Arborio Rice", 200.0f, true),
+        Ingredient("Mushrooms".hashCode(), "Mushrooms", 150.0f, true),
+        Ingredient("Onions".hashCode(), "Onions", 0.5f, true),
+        Ingredient("White Wine".hashCode(), "White Wine", 0.2f, true),
+        Ingredient("Parmesan Cheese".hashCode(), "Parmesan Cheese", 0.2f, true),
+        Ingredient("Butter".hashCode(), "Butter", 0.1f, true),
+        Ingredient("Olive Oil".hashCode(), "Olive Oil", 0.1f, true),
+        Ingredient("Vegetable Broth".hashCode(), "Vegetable Broth", 0.2f, true),
+        Ingredient("Garlic".hashCode(), "Garlic", 0.05f, true),
+        Ingredient("Salt".hashCode(), "Salt", 0.05f, true),
+        Ingredient("Black Pepper".hashCode(), "Black Pepper", 0.02f, true)
+    )
+    val list_ingredients5 = listOf(
+        Ingredient("Salmon Fillet".hashCode(), "Salmon Fillet", 2.0f, true),
+        Ingredient("Lemon".hashCode(), "Lemon", 1.0f, true),
+        Ingredient("Dill".hashCode(), "Dill", 0.1f, true),
+        Ingredient("Olive Oil".hashCode(), "Olive Oil", 0.25f, true),
+        Ingredient("Salt".hashCode(), "Salt", 0.05f, true),
+        Ingredient("Black Pepper".hashCode(), "Black Pepper", 0.02f, true)
+    )
+    val list_ingredients6 = listOf(
+        Ingredient("Broccoli".hashCode(), "Broccoli", 1.0f, true),
+        Ingredient("Bell Peppers".hashCode(), "Bell Peppers", 1.0f, true),
+        Ingredient("Carrots".hashCode(), "Carrots", 1.0f, true),
+        Ingredient("Zucchini".hashCode(), "Zucchini", 1.0f, true),
+        Ingredient("Soy Sauce".hashCode(), "Soy Sauce", 0.1f, true),
+        Ingredient("Sesame Oil".hashCode(), "Sesame Oil", 0.1f, true),
+        Ingredient("Garlic".hashCode(), "Garlic", 0.05f, true),
+        Ingredient("Ginger".hashCode(), "Ginger", 0.05f, true),
+        Ingredient("Rice".hashCode(), "Rice", 200.0f, true),
+    )
+    val list_ingredients7 = listOf(
+        Ingredient("Pizza Dough".hashCode(), "Pizza Dough", 1.0f, true),
+        Ingredient("Tomato Sauce".hashCode(), "Tomato Sauce", 0.2f, true),
+        Ingredient("Mozzarella Cheese".hashCode(), "Mozzarella Cheese", 0.2f, true),
+        Ingredient("Pepperoni".hashCode(), "Pepperoni", 0.1f, true),
+        Ingredient("Bell Peppers".hashCode(), "Bell Peppers", 0.2f, true),
+        Ingredient("Onions".hashCode(), "Onions", 0.1f, true),
+        Ingredient("Mushrooms".hashCode(), "Mushrooms", 0.2f, true),
+        Ingredient("Olive Oil".hashCode(), "Olive Oil", 0.1f, true),
+        Ingredient("Basil".hashCode(), "Basil", 0.02f, true),
+    )
+    val list_ingredients8 = listOf(
+        Ingredient("Ground Beef".hashCode(), "Ground Beef", 0.3f, true),
+        Ingredient("Taco Shells".hashCode(), "Taco Shells", 4.0f, true),
+        Ingredient("Lettuce".hashCode(), "Lettuce", 1.0f, true),
+        Ingredient("Tomatoes".hashCode(), "Tomatoes", 1.0f, true),
+        Ingredient("Onions".hashCode(), "Onions", 0.5f, true),
+        Ingredient("Cheddar Cheese".hashCode(), "Cheddar Cheese", 0.2f, true),
+        Ingredient("Sour Cream".hashCode(), "Sour Cream", 0.1f, true),
+        Ingredient("Taco Seasoning".hashCode(), "Taco Seasoning", 0.05f, true),
+    )
+    val list_ingredients9 = listOf(
+        Ingredient("Pumpkin".hashCode(), "Pumpkin", 1.0f, true),
+        Ingredient("Onions".hashCode(), "Onions", 0.5f, true),
+        Ingredient("Garlic".hashCode(), "Garlic", 0.05f, true),
+        Ingredient("Vegetable Broth".hashCode(), "Vegetable Broth", 0.3f, true),
+        Ingredient("Heavy Cream".hashCode(), "Heavy Cream", 0.2f, true),
+        Ingredient("Nutmeg".hashCode(), "Nutmeg", 0.02f, true),
+        Ingredient("Salt".hashCode(), "Salt", 0.05f, true),
+        Ingredient("Black Pepper".hashCode(), "Black Pepper", 0.02f, true)
+    )
+    val list_ingredients10 = listOf(
+        Ingredient("Whole Chicken".hashCode(), "Whole Chicken", 1.0f, true),
+        Ingredient("Lemon".hashCode(), "Lemon", 2.0f, true),
+        Ingredient("Garlic".hashCode(), "Garlic", 0.1f, true),
+        Ingredient("Rosemary".hashCode(), "Rosemary", 0.05f, true),
+        Ingredient("Thyme".hashCode(), "Thyme", 0.05f, true),
+        Ingredient("Olive Oil".hashCode(), "Olive Oil", 0.1f, true),
+        Ingredient("Salt".hashCode(), "Salt", 0.05f, true),
+        Ingredient("Black Pepper".hashCode(), "Black Pepper", 0.02f, true)
+    )
+    val recipe1 = Recipe(
+        "Vegan Mix Vegetable Caesar".hashCode(),
+        "Vegan Mix Vegetable Caesar",
+        imageBitmap,
+        20, // Prepare time set to 20 minutes
+        1,
+        "Instructions for Vegan Mix Vegetable Caesar",
+        list_ingredients1,
+        "1. Wash and chop lettuce, cucumbers, tomatoes, bell peppers, and red onions.\n" +
+                "2. In a bowl, mix olive oil, vinegar, salt, and pepper to make the dressing.\n" +
+                "3. Toss the chopped vegetables with the dressing and serve."
+    )
+
+    val recipe2 = Recipe(
+        "Spaghetti Carbonara".hashCode(),
+        "Spaghetti Carbonara",
+        imageBitmap,
+        30, // Prepare time set to 30 minutes
+        1,
+        "Instructions for Spaghetti Carbonara",
+        list_ingredients2,
+        "1. Cook spaghetti according to package instructions.\n" +
+                "2. In a separate pan, fry bacon until crispy.\n" +
+                "3. Whisk eggs and mix in grated Parmesan cheese.\n" +
+                "4. Drain spaghetti and toss with egg and cheese mixture. Add bacon.\n" +
+                "5. Season with salt and pepper. Serve."
+    )
+
+    val recipe3 = Recipe(
+        "Grilled Chicken Salad".hashCode(),
+        "Grilled Chicken Salad",
+        imageBitmap,
+        15,
+        1,
+        "Instructions for Grilled Chicken Salad",
+        list_ingredients3,
+        "1. Grill chicken until cooked through and slightly charred.\n" +
+                "2. Chop lettuce, tomatoes, cucumbers, and red onions.\n" +
+                "3. Mix olive oil and lemon juice to make the dressing.\n" +
+                "4. Toss grilled chicken and vegetables with the dressing and serve."
+    )
+
+    val recipe4 = Recipe(
+        "Mushroom Risotto".hashCode(),
+        "Mushroom Risotto",
+        imageBitmap,
+        35,
+        1,
+        "Instructions for Mushroom Risotto",
+        list_ingredients4,
+        "1. Sauté onions and garlic in olive oil until soft.\n" +
+                "2. Add Arborio rice and cook for a few minutes.\n" +
+                "3. Gradually add vegetable broth and white wine while stirring.\n" +
+                "4. Stir in mushrooms, Parmesan cheese, and butter until creamy. Serve hot."
+    )
+
+    val recipe5 = Recipe(
+        "Pan-Seared Salmon".hashCode(),
+        "Pan-Seared Salmon",
+        imageBitmap,
+        25,
+        1,
+        "Instructions for Pan-Seared Salmon",
+        list_ingredients5,
+        "1. Season salmon fillet with salt, pepper, and lemon juice.\n" +
+                "2. Heat olive oil in a pan and sear the salmon until cooked through.\n" +
+                "3. Sprinkle with fresh dill. Serve with your favorite side dishes."
+    )
+
+    val recipe6 = Recipe(
+        "Vegetable Stir-Fry".hashCode(),
+        "Vegetable Stir-Fry",
+        imageBitmap,
+        20,
+        1,
+        "Instructions for Vegetable Stir-Fry",
+        list_ingredients6,
+        "1. Heat sesame oil in a wok or pan.\n" +
+                "2. Add chopped vegetables and stir-fry until tender-crisp.\n" +
+                "3. Stir in soy sauce, garlic, and ginger. Serve with cooked rice."
+    )
+
+    val recipe7 = Recipe(
+        "Homemade Pizza".hashCode(),
+        "Homemade Pizza",
+        imageBitmap,
+        40,
+        1,
+        "Instructions for Homemade Pizza",
+        list_ingredients7,
+        "1. Roll out pizza dough and spread tomato sauce.\n" +
+                "2. Sprinkle with mozzarella cheese and add your favorite toppings.\n" +
+                "3. Bake in a preheated oven until the crust is golden. Slice and enjoy."
+    )
+
+    val recipe8 = Recipe(
+        "Beef Tacos".hashCode(),
+        "Beef Tacos",
+        imageBitmap,
+        30,
+        1,
+        "Instructions for Beef Tacos",
+        list_ingredients8,
+        "1. Brown ground beef in a skillet and add taco seasoning.\n" +
+                "2. Warm taco shells in the oven.\n" +
+                "3. Assemble tacos with beef, lettuce, tomatoes, cheese, and sour cream."
+    )
+
+    val recipe9 = Recipe(
+        "Pumpkin Soup".hashCode(),
+        "Pumpkin Soup",
+        imageBitmap,
+        25,
+        1,
+        "Instructions for Pumpkin Soup",
+        list_ingredients9,
+        "1. Roast pumpkin with onions and garlic in the oven.\n" +
+                "2. Puree the roasted vegetables with vegetable broth.\n" +
+                "3. Add cream, nutmeg, salt, and pepper. Reheat and serve."
+    )
+
+    val recipe10 = Recipe(
+        "Lemon Herb Roasted Chicken".hashCode(),
+        "Lemon Herb Roasted Chicken",
+        imageBitmap,
+        40,
+        1,
+        "Instructions for Lemon Herb Roasted Chicken",
+        list_ingredients10,
+        "1. Rub chicken with olive oil, lemon, and herbs.\n" +
+                "2. Roast in the oven until golden and cooked through. Serve with your favorite sides."
+    )
+
+
     val list = mutableListOf(
-        Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"","Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients),
-        Recipe("Vegan Mix Vegetable ".hashCode(),"","Vegan Mix Vegetable ",imageBitmap,20,140, "salad",list_ingridients),
-        Recipe("Vegan Mix  Ceaser".hashCode(),"","Vegan Mix  Ceaser",imageBitmap,20,140, "salad",list_ingridients),
+        recipe1,
+        recipe2,
+        recipe3,
+        recipe4,
+        recipe5,
+        recipe6,
+        recipe7,
+        recipe8,
+        recipe9,
+        recipe10,
     )
     viewModel.load(list)
     val meals = mutableListOf(
         Meal("Salad",list),
         Meal("Cherry",list),
         Meal("Main Course",list)
-    )
+    )*/
     val sortList = listOf(
         SortElement("All", Sort.ALL, {  }),
         SortElement("Main Course", Sort.MAIN_COURSE, { }),

@@ -3,6 +3,7 @@ package com.example.recipesapp
 import androidx.compose.ui.graphics.Color
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.expandVertically
@@ -49,23 +50,29 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.recipesapp.ui.MaterialText
 
 @Composable
-fun MainScreen(controller: NavHostController, viewModel: MainViewModel) {
+fun MainScreen(controller: NavHostController, viewModel: MainViewModel, recipe: Recipe) {
 
     val imageResource = R.drawable.test_image // Replace with your image resource name
     val context = LocalContext.current
     val bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, imageResource)
     val imageBitmap: ImageBitmap = bitmap.asImageBitmap()
 
-
+    val navBackStackEntry by controller.currentBackStackEntryAsState()
+    val recipeArg = navBackStackEntry?.arguments?.getString("recipeId")?.let { recipeId ->
+        Log.d("TAGGGG",recipeId.toString())
+    }
     val list_ingridients = listOf<Ingredient>(
         Ingredient("pepper".hashCode(),"pepper",0.5f,true),
         Ingredient("peppe".hashCode(),"peppe",0.5f,true),
         Ingredient("pepp".hashCode(),"pepp",0.5f,true)
     )
+/*
     val recipe =         Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done")
+*/
     val servings by viewModel.servings
     LazyColumn(modifier = Modifier
         .fillMaxWidth()) {

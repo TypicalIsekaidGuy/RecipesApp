@@ -67,9 +67,7 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
     val bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, imageResource)
     val imageBitmap: ImageBitmap = bitmap.asImageBitmap()
     val recipes = viewModel.data.collectAsState()
-    for (i in recipes.value) {
-        Log.d("TAG",i.image.toString())
-    }
+    val sortItems = viewModel.sort_list
 
     val selectorState = mutableStateOf(false)
 
@@ -333,20 +331,17 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
         Meal("Cherry",list),
         Meal("Main Course",list)
     )*/
-    val sortList = listOf(
-        SortElement("All", Sort.ALL, {  }),
-        SortElement("Main Course", Sort.MAIN_COURSE, { }),
-        SortElement("Breakfast", Sort.BREAKFAST, {   }) ,
-        SortElement("Salad", Sort.SALAD, {  })
-    )
     Column(modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 16.dp)) {
         SearchTopBar()
-        SearchSortBar(modifier = Modifier, sortList = sortList )
+        SearchSortBar(modifier = Modifier, sortList = sortItems )
         SearchTextField(viewModel, onTextFieldValueChange = { viewModel.onSearchChange(searchText.value) })
-        RecipePreviewList(recipes.value)
+        RecipePreviewList(recipes.value,controller)
     }
+}
+fun navigateToMainScreen(controller: NavHostController, recipe: Recipe){
+    controller.navigate("${Screen.MainScreen.route}/{${recipe.toString()}}")
 }
 @Composable
 fun SearchTopBar(){
@@ -407,20 +402,20 @@ fun SortItem(
             modifier = Modifier
                 .clip(CircleShape)
                 .background(
-                    if (pickedId.value == sortItem.sortBy.ordinal) colorScheme.onSecondary
+                    if (pickedId.value == sortItem.order) colorScheme.onSecondary
                     else colorScheme.tertiary
                 )
                 .clickable {
-                    if (pickedId.value == sortItem.sortBy.ordinal) {
+                    if (pickedId.value == sortItem.order) {
                         pickedId.value = -1
                     } else {
-                        pickedId.value = sortItem.sortBy.ordinal
+                        pickedId.value = sortItem.order
                         sortItem.onClick()
                     }
                 }
                 .padding(8.dp)
         ) {
-            MaterialText(text = sortItem.name, textStyle = MaterialTheme.typography.headlineMedium, modifier = Modifier,color = if (pickedId.value == sortItem.sortBy.ordinal) colorScheme.tertiary
+            MaterialText(text = sortItem.name, textStyle = MaterialTheme.typography.headlineMedium, modifier = Modifier,color = if (pickedId.value == sortItem.order) colorScheme.tertiary
             else colorScheme.onSecondary)
         }
 
@@ -509,7 +504,7 @@ fun SearchTextField(viewModel: SearchViewModel, onTextFieldValueChange: (String)
 }
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RecipePreviewList(recipes: List<Recipe>) {
+fun RecipePreviewList(recipes: List<Recipe>, controller: NavHostController) {
     val scrollState = rememberLazyListState()
     val itemCount = recipes.size
 
@@ -524,7 +519,8 @@ fun RecipePreviewList(recipes: List<Recipe>) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(4.dp)
-                        */)
+                        */
+        ) { navigateToMainScreen(controller, recipes[page]) }
     }
 }
 
@@ -550,62 +546,9 @@ fun RecipePreviewList(meal: Meal) {
 
 
 @Composable
-fun RecipesSelector(selectorState: MutableState<Boolean>) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        ClickableSelector(
-            isSelected = selectorState,
-            onClick = {
-                // Trigger the function for the Main Course selector
-            },
-            text = "Soup",
-        )
-        ClickableSelector(
-            isSelected = selectorState,
-            onClick = {
-                // Trigger the function for the Main Course selector
-            },
-            text = "Ssssssoup",
-        )
-        ClickableSelector(
-            isSelected = selectorState,
-            onClick = {
-                // Trigger the function for the Main Course selector
-            },
-            text = "p",
-        )
-        ClickableSelector(
-            isSelected = selectorState,
-            onClick = {
-                // Trigger the function for the Main Course selector
-            },
-            text = "Soup",
-        )
-
-
-    }
-}
-@Composable
-fun ClickableSelector(
-    isSelected: MutableState<Boolean>,
-    onClick: () -> Unit,
-    text: String
-) {
-    Box(
-        modifier = Modifier
-            .clickable {
-                isSelected.value = true
-                onClick()
-            }
-            .background(if (isSelected.value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
-    ){
-        Text(text = text)
-    }
-}@Composable
 fun RecipePreviewItem(
-    recipe: Recipe
+    recipe: Recipe,
+    openRecipe: ()-> Unit
 ) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -616,6 +559,7 @@ fun RecipePreviewItem(
                     modifier = Modifier
                         .size(width = 360.dp, height = 640.dp)
                         .clip(RoundedCornerShape(12.dp))
+                        .clickable { openRecipe() }
                 ) {
                     Image(
                         bitmap = recipe.image,

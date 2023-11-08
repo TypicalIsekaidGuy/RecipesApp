@@ -17,7 +17,9 @@ class SearchViewModel(val authRepository: AuthRepository): ViewModel() {
     }
 
     private val _data = MutableStateFlow<List<Recipe>>(emptyList())
-    val data: StateFlow<List<Recipe>> = _data
+    var data: MutableStateFlow<List<Recipe>> =  MutableStateFlow(_data.value.toList())
+    private var _originalData: List<Recipe> = emptyList()
+    var sort_list : MutableList<SortElement> = mutableListOf()
 
 
     private val _searchText = MutableStateFlow("")
@@ -30,37 +32,58 @@ class SearchViewModel(val authRepository: AuthRepository): ViewModel() {
 
             _searchText.value= text
             Log.d(TAG,_searchText.value)
+            data.value = _data.value.toList()
             val filteredData = if (_searchText.value.isBlank()) {
                 // If the search text is empty, show all data
-                _data.value.toList()
+                data.value.toList()
             } else {
-                _data.value.filter { currency ->
+                data.value.filter { currency ->
                     currency.name.contains(_searchText.value, ignoreCase = true)
                 }
             }
-            _data.value = filteredData as MutableList<Recipe>
+            data.value = filteredData as MutableList<Recipe>
         }
         catch (e: Exception){
             e.message?.let { Log.d(TAG, it) }
         }
     }
-    fun filterByMeal(meal: String){
-        _data.value.filter { currency ->
-            currency.meal == meal
-        }
-    }
+
     fun load(list : List<Recipe>){
         authRepository.saveRecipeToDatabase(list)
     }
+    // Function to filter the data based on meal.
+    fun sortRecipes(meal: String) {
+        data.value = _data.value.toList()  // Create a new List with the same data
+        val sortedRecipes = data.value.filter { it.meal.toLowerCase() == meal.toLowerCase() }
+        data.value = sortedRecipes
+
+        Log.d(TAG,_data.toString())
+        Log.d(TAG,data.toString())
+    }
+
+
     private fun get_data() {
         viewModelScope.launch {
             try {
-                val recipes = authRepository.getRecipesFromDatabase()
-                _data.value = recipes
+                authRepository.getRecipesFromDatabase().collect {
+                    _data.value = it
+                    Log.d(TAG,data.toString())
+                    data.value = _data.value.toList()  // Create a new List with the same data
+                    val meals = it.map { it.meal }.distinct()
+                    Log.d(TAG,_data.toString())
+                    Log.d(TAG,data.toString())
+                    Log.d(TAG,it.toString())
+                    sort_list = meals.mapIndexed { index, meal ->
+                        SortElement(meal, index) {
+                            sortRecipes(meal)
+                        }
+                    } as MutableList<SortElement>
+                }
+                Log.d("Zalll", _data.value[0].description)
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Handle any errors, e.g., show an error message or log the exception.
             }
         }
     }
+
 }

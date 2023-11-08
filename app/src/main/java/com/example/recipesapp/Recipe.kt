@@ -1,8 +1,9 @@
 package com.example.recipesapp
 
+import android.net.Uri
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.imageResource
-
+import com.google.gson.Gson
 
 
 data class Recipe(
@@ -14,4 +15,11 @@ data class Recipe(
     val meal: String= "",
     val ingridients: List<Ingredient> = emptyList(),
     val description: String = ""
-)
+){
+    override fun toString(): String = Uri.encode(Gson().toJson(this))
+}
+class RecipeArgType : JsonNavType<Recipe>() {
+    override fun fromJsonParse(value: String): Recipe = Gson().fromJson(value, Recipe::class.java)
+
+    override fun Recipe.getJsonParse(): String = Gson().toJson(this)
+}

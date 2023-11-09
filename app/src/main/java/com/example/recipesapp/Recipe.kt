@@ -1,10 +1,12 @@
 package com.example.recipesapp
 
 import android.net.Uri
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.imageResource
+import androidx.versionedparcelable.VersionedParcelize
 import com.google.gson.Gson
-
 
 data class Recipe(
     val id: Int = 0,
@@ -16,7 +18,7 @@ data class Recipe(
     val ingridients: List<Ingredient> = emptyList(),
     val description: String = ""
 ){
-    override fun toString(): String = Uri.encode(Gson().toJson(this))
+ override fun toString(): String = Uri.encode(Gson().toJson(this))
 }
 class RecipeArgType : JsonNavType<Recipe>() {
     override fun fromJsonParse(value: String): Recipe = Gson().fromJson(value, Recipe::class.java)

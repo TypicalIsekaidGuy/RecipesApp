@@ -22,15 +22,15 @@ fun Navigation(viewModels: HashMap<Screen, ViewModel>){
         composable(route = Screen.SearchScreen.route){
             SearchScreen(navController,viewModels[Screen.SearchScreen] as SearchViewModel)
         }
-/*        composable(
-            route = "${Screen.MainScreen}/{recipe}",
+        composable(
+            route = "${Screen.MainScreen.route}/{recipe}",
             arguments = listOf(navArgument("recipe") {
                 type = RecipeArgType()
             })
         ) { navBackStackEntry ->
             val recipe = navBackStackEntry.arguments?.getString("recipe")?.let { Gson().fromJson(it, Recipe::class.java) }
             MainScreen(navController, viewModels[Screen.MainScreen] as MainViewModel, recipe!!)
-        }*/
+        }
 
 /*        composable(route = Screen.CalculatorScreen.route + "/{name}/{price}", arguments = listOf(navArgument("name") { type = NavType.StringType },navArgument("price") { type = NavType.FloatType } )){backStackEntry ->
             if(backStackEntry.arguments?.getString("name").isNullOrEmpty()||backStackEntry.arguments?.getFloat("price")==null){

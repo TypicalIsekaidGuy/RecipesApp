@@ -25,11 +25,12 @@ import java.io.ByteArrayOutputStream
 
 
 class AuthRepository() {
-    val TAG = "AuthRepository"
+    var TAG = "AuthRepository"
     private val auth: FirebaseAuth by lazy {
         FirebaseAuth.getInstance()
     }
     val recipes = mutableListOf<Recipe>()
+    val favorites = mutableListOf<Recipe>()
     private val firebaseData = Firebase.database("https://recipiesapp-b482b-default-rtdb.europe-west1.firebasedatabase.app/").reference
 
     fun logout() = auth.signOut()
@@ -216,6 +217,14 @@ class AuthRepository() {
             return bitmap.asImageBitmap()
 
     }
+
+    fun getFavorites(): Flow<List<Recipe>> = flow {
+        if(favorites.isNotEmpty()){
+            emit(favorites)
+            Log.d("ZAAuth", recipes.toString())
+        }
+
+    }.flowOn(Dispatchers.IO)
 
 
 }

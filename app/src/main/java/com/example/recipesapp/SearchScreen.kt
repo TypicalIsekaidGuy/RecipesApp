@@ -1,6 +1,7 @@
 package com.example.recipesapp
 
 import android.annotation.SuppressLint
+
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,6 +34,10 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -70,10 +76,13 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
     val sortItems = viewModel.sort_list
 
     val selectorState = mutableStateOf(false)
+    var selectedItemIndex = -1
 
 
     val searchText = viewModel.searchText
     val isSearching by viewModel.isSearching.collectAsState()
+
+    val list = NavItems(onClick1 = {}, onClick2 = {}).nav_items
 
 /*    val list_ingredients1 = listOf<Ingredient>(
         Ingredient("Lettuce".hashCode(), "Lettuce", 2.0f, true),
@@ -331,20 +340,58 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
         Meal("Cherry",list),
         Meal("Main Course",list)
     )*/
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 16.dp)) {
-        SearchTopBar()
-        SearchSortBar(modifier = Modifier, sortList = sortItems )
-        SearchTextField(viewModel, onTextFieldValueChange = { viewModel.onSearchChange(searchText.value) })
-        RecipePreviewList(recipes.value,controller)
+
+    ModalNavigationDrawer(                        drawerContent = {
+        ModalDrawerSheet {
+            Spacer(modifier = Modifier.height(16.dp))
+            list.forEachIndexed { index, item ->
+                NavigationDrawerItem(
+                    label = {
+                        Text(text = item.title)
+                    },
+                    selected = index == selectedItemIndex,
+                    onClick = {
+//                                            navController.navigate(item.route)
+                        selectedItemIndex = index
+/*                        scope.launch {
+                            drawerState.close()
+                        }*/
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = if (index == selectedItemIndex) {
+                                item.selectedIcon
+                            } else item.unselectedIcon,
+                            contentDescription = item.title
+                        )
+                    },
+                    badge = {
+                        item.badgeCount?.let {
+                            Text(text = item.badgeCount.toString())
+                        }
+                    },
+                    modifier = Modifier
+                        .padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+            }
+        }
+    },) {
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)) {
+            SearchTopBar(){controller.navigate(Screen.FavoriteScreen.route)}
+            SearchSortBar(modifier = Modifier, sortList = sortItems )
+            SearchTextField(viewModel, onTextFieldValueChange = { viewModel.onSearchChange(searchText.value) })
+            RecipePreviewList(recipes.value,controller)
+        }
     }
 }
 fun navigateToMainScreen(controller: NavHostController, recipe: Recipe){
+    Log.d("huy",recipe.toString())
     controller.navigate("${Screen.MainScreen.route}/{${recipe.toString()}}")
 }
 @Composable
-fun SearchTopBar(){
+fun SearchTopBar(onClick:()->Unit){
     Box(
         modifier = Modifier
             .padding(top = 32.dp)
@@ -365,7 +412,7 @@ fun SearchTopBar(){
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_menu_32),
                         contentDescription = "Icon 2",
-                        modifier = Modifier.clickable {  },
+                        modifier = Modifier.clickable { onClick() },
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }

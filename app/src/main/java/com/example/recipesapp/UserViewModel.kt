@@ -20,6 +20,7 @@ class UserViewModel(private val authRepository: AuthRepository): ViewModel() {
     val recipies = _recipies
 
     init {
+        authRepository.TAG = "AUTH"
        isUserInitialized.value =  authRepository.checkUser()//make splashScreen and check it there
         fetchAllRecipies()
     }
@@ -32,6 +33,7 @@ class UserViewModel(private val authRepository: AuthRepository): ViewModel() {
 
     fun confirmAuth(){
         try{
+            authRepository.TAG = "AUTH"
             isLoginCorrect()
             isPasswordCorrect()
             isNameCorrect()

@@ -13,6 +13,7 @@ class SearchViewModel(val authRepository: AuthRepository): ViewModel() {
     val TAG = "SearchViewModel"
 
     init {
+        Log.d(TAG,authRepository.TAG)
         get_data()
     }
 

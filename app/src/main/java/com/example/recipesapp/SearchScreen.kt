@@ -66,7 +66,7 @@ import com.example.recipesapp.ui.MaterialText
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel, setViewmodelRecipe:(Recipe)->Unit) {
+fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
 
     val imageResource = R.drawable.test_image // Replace with your image resource name
     val context = LocalContext.current
@@ -384,7 +384,7 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel, setV
             SearchSortBar(modifier = Modifier, sortList = sortItems )
             SearchTextField(viewModel, onTextFieldValueChange = { viewModel.onSearchChange(searchText.value) })
             RecipePreviewList(recipes.value){ recipe ->
-                setViewmodelRecipe(recipe)
+                viewModel.setCurrentRecipe(recipe)
                 navigateToMainScreen(controller, recipe)
             }
         }

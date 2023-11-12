@@ -93,5 +93,8 @@ class SearchViewModel(val authRepository: AuthRepository): ViewModel() {
             }
         }
     }
+    fun setCurrentRecipe(recipe: Recipe){
+        authRepository.currentRecipe.value = recipe
+    }
 
 }

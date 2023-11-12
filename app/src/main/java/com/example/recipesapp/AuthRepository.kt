@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -32,6 +34,21 @@ class AuthRepository() {
     val recipes = mutableListOf<Recipe>()
     var favorites = mutableListOf<Recipe>()
     private val firebaseData = Firebase.database("https://recipiesapp-b482b-default-rtdb.europe-west1.firebasedatabase.app/").reference
+    val list_ingredients1 = listOf<Ingredient>(
+        Ingredient("Lettuce".hashCode(), "Lettuce", 2.0f, true),)
+
+    var currentRecipe = mutableStateOf(Recipe(
+        "Vegan Mix Vegetable Caesar".hashCode(),
+        "Vegan Mix Vegetable Caesar",
+        ImageBitmap(20,20),
+        20, // Prepare time set to 20 minutes
+        1,
+        "Instructions for Vegan Mix Vegetable Caesar",
+        list_ingredients1,
+        "1. Wash and chop lettuce, cucumbers, tomatoes, bell peppers, and red onions.\n" +
+                "2. In a bowl, mix olive oil, vinegar, salt, and pepper to make the dressing.\n" +
+                "3. Toss the chopped vegetables with the dressing and serve."
+    ))
 
     fun logout() = auth.signOut()
 
@@ -279,6 +296,10 @@ class AuthRepository() {
             }
         }
     }.flowOn(Dispatchers.IO)
+
+    fun isCurrentRecipeFavorite(recipe: Recipe):Boolean{
+        return recipe in favorites
+    }
 
     fun addCurrentRecipeToFavorite(recipe: Recipe) {
         val favoriteMap = mapOf(

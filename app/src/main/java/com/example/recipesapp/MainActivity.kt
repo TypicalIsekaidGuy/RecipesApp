@@ -25,9 +25,9 @@ class MainActivity : ComponentActivity() {
             return SearchViewModel(authRepository) as T
         }
     }
-    class MainViewModelFactory() : ViewModelProvider.Factory {
+    class MainViewModelFactory(private val authRepository: AuthRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return MainViewModel() as T
+            return MainViewModel(authRepository) as T
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {//if there are problems with back button override it here
@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
         viewModelMap[Screen.UserScreen] = ViewModelProvider(this,UserViewModelFactory(authRepository))[UserViewModel::class.java]
         viewModelMap[Screen.FavoriteScreen] = ViewModelProvider(this,FavoriteViewModelFactory(authRepository))[FavoriteViewModel::class.java]
         viewModelMap[Screen.SearchScreen] = ViewModelProvider(this,SearchViewModelFactory(authRepository))[SearchViewModel::class.java]
-        viewModelMap[Screen.MainScreen] = ViewModelProvider(this,MainViewModelFactory())[MainViewModel::class.java]
+        viewModelMap[Screen.MainScreen] = ViewModelProvider(this,MainViewModelFactory(authRepository))[MainViewModel::class.java]
 
         setContent {
             RecipesAppTheme {

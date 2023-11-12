@@ -36,6 +36,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +67,8 @@ fun MainScreen(controller: NavHostController, viewModel: MainViewModel) {
     val ingredientText = viewModel.ingredientText
     val descriptionText = recipe.description
     val presentationText = recipe.presentation
+    var isFavorite = remember {mutableStateOf(true)}
+    isFavorite.value = viewModel.isFavorite
 
 /*
     val recipe =         Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done")
@@ -78,7 +81,7 @@ fun MainScreen(controller: NavHostController, viewModel: MainViewModel) {
                 .padding(horizontal = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
-                MainTopBar({controller.popBackStack()},{viewModel.addFavorite(recipe)},{viewModel.removeFavorite(recipe)})
+                MainTopBar({controller.popBackStack()},{viewModel.addFavorite(recipe)},{viewModel.removeFavorite(recipe)},isFavorite)
                 MaterialText(text = recipe.name, textStyle = MaterialTheme.typography.displayLarge, modifier = Modifier
                     , lineHeight = 32.sp)
                 Box(
@@ -105,7 +108,7 @@ fun MainScreen(controller: NavHostController, viewModel: MainViewModel) {
             Column(){
 
                 DescriptionItem("Ingridients", ingredientText, MaterialTheme.colorScheme.secondary)
-                Spacer(modifier = Modifier.height(-8.dp)) // Adjust the negative margin as needed
+                Spacer(modifier = Modifier.height((-8).dp)) // Adjust the negative margin as needed
                 DescriptionItem("Description", descriptionText, MaterialTheme.colorScheme.surfaceVariant, topBackgroundColor = MaterialTheme.colorScheme.secondary)
 
             }
@@ -113,7 +116,7 @@ fun MainScreen(controller: NavHostController, viewModel: MainViewModel) {
     }
 }
 @Composable
-fun MainTopBar(goBackToScreen: ()-> Unit,add: ()-> Unit,remove: ()-> Unit,){
+fun MainTopBar(goBackToScreen: ()-> Unit,add: ()-> Unit,remove: ()-> Unit,isFavorite: MutableState<Boolean>){
     Box(
         modifier = Modifier
             .padding(top = 32.dp)
@@ -145,8 +148,14 @@ fun MainTopBar(goBackToScreen: ()-> Unit,add: ()-> Unit,remove: ()-> Unit,){
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_lock_24),
                         contentDescription = "Icon 2",
-                        modifier = Modifier.clickable {  },
-                        tint = MaterialTheme.colorScheme.primary
+                        modifier = Modifier.clickable {
+                                                      if(isFavorite.value)
+                                                          add()
+                            else
+                                remove()
+                            isFavorite.value = !isFavorite.value
+                        },
+                        tint = if(isFavorite.value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                     )
                 }
             }

@@ -7,6 +7,8 @@ import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -54,22 +56,17 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.recipesapp.ui.MaterialText
 
 @Composable
-fun MainScreen(controller: NavHostController, viewModel: MainViewModel, recipe: Recipe) {
+fun MainScreen(controller: NavHostController, viewModel: MainViewModel) {
 
     val imageResource = R.drawable.test_image // Replace with your image resource name
     val context = LocalContext.current
     val bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, imageResource)
     val imageBitmap: ImageBitmap = bitmap.asImageBitmap()
+    val recipe = viewModel.currentRecipe
+    val ingredientText = viewModel.ingredientText
+    val descriptionText = recipe.description
+    val presentationText = recipe.presentation
 
-    val navBackStackEntry by controller.currentBackStackEntryAsState()
-    val recipeArg = navBackStackEntry?.arguments?.getString("recipeId")?.let { recipeId ->
-        Log.d("TAGGGG",recipeId.toString())
-    }
-    val list_ingridients = listOf<Ingredient>(
-        Ingredient("pepper".hashCode(),"pepper",0.5f,true),
-        Ingredient("peppe".hashCode(),"peppe",0.5f,true),
-        Ingredient("pepp".hashCode(),"pepp",0.5f,true)
-    )
 /*
     val recipe =         Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done")
 */
@@ -81,7 +78,7 @@ fun MainScreen(controller: NavHostController, viewModel: MainViewModel, recipe: 
                 .padding(horizontal = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
-                MainTopBar{controller.popBackStack()}
+                MainTopBar({controller.popBackStack()},{viewModel.addFavorite(recipe)},{viewModel.removeFavorite(recipe)})
                 MaterialText(text = recipe.name, textStyle = MaterialTheme.typography.displayLarge, modifier = Modifier
                     , lineHeight = 32.sp)
                 Box(
@@ -99,7 +96,7 @@ fun MainScreen(controller: NavHostController, viewModel: MainViewModel, recipe: 
                         alignment = Alignment.Center,
                     )
                 }
-                MaterialText(text = "ROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOooooooooooooooooooooooooooooooooooooooooooooooooo", textStyle = MaterialTheme.typography.headlineMedium, modifier = Modifier
+                MaterialText(text = recipe.presentation, textStyle = MaterialTheme.typography.headlineMedium, modifier = Modifier
                     , lineHeight = 24.sp)
                 ClarificationBar(servings, viewModel)
             }
@@ -107,16 +104,16 @@ fun MainScreen(controller: NavHostController, viewModel: MainViewModel, recipe: 
         item{
             Column(){
 
-                DescriptionItem("Ingridients", "Lorem Ispum", MaterialTheme.colorScheme.secondary)
+                DescriptionItem("Ingridients", ingredientText, MaterialTheme.colorScheme.secondary)
                 Spacer(modifier = Modifier.height(-8.dp)) // Adjust the negative margin as needed
-                DescriptionItem("Description", "Lorem Ispumssssssssssssssssssssssssssssssssssssssssssssss", MaterialTheme.colorScheme.surfaceVariant, topBackgroundColor = MaterialTheme.colorScheme.secondary)
+                DescriptionItem("Description", descriptionText, MaterialTheme.colorScheme.surfaceVariant, topBackgroundColor = MaterialTheme.colorScheme.secondary)
 
             }
         }
     }
 }
 @Composable
-fun MainTopBar(goBackToScreen: ()-> Unit){
+fun MainTopBar(goBackToScreen: ()-> Unit,add: ()-> Unit,remove: ()-> Unit,){
     Box(
         modifier = Modifier
             .padding(top = 32.dp)
@@ -284,13 +281,13 @@ fun DescriptionItem(
         AnimatedVisibility(
             visible = expanded,
             enter = expandVertically(),
-            exit = shrinkVertically()
+            exit =shrinkVertically()
         ) {
             Box(modifier = Modifier
                 .background(backgroundColor)){
 
                 MaterialText(
-                    text = text,
+                    text = "ttttttttttttttttttttttttttttt\nttttttttttttttttttt",
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),

@@ -16,7 +16,8 @@ data class Recipe(
     val views :Int = 1,
     val meal: String= "",
     val ingridients: List<Ingredient> = emptyList(),
-    val description: String = ""
+    val description: String = "",
+    val presentation: String = ""
 ){
  override fun toString(): String = Uri.encode(Gson().toJson(this))
 }

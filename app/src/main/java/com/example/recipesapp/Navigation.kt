@@ -12,7 +12,8 @@ import com.google.gson.Gson
 @Composable
 fun Navigation(viewModels: HashMap<Screen, ViewModel>){
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.UserScreen.route/*+ "/name/10F" */){
+    NavHost(navController = navController, startDestination = Screen.UserScreen.route/*+ "/name/10F" */){//try using from userviewmodel if statement
+        val mainViewModel = viewModels[Screen.MainScreen] as MainViewModel
         composable(route = Screen.FavoriteScreen.route){
             FavoriteScreen(navController, viewModels[Screen.FavoriteScreen] as FavoriteViewModel)
         }
@@ -20,16 +21,11 @@ fun Navigation(viewModels: HashMap<Screen, ViewModel>){
             UserScreen(navController,viewModels[Screen.UserScreen] as UserViewModel)
         }
         composable(route = Screen.SearchScreen.route){
-            SearchScreen(navController,viewModels[Screen.SearchScreen] as SearchViewModel)
+            SearchScreen(navController,viewModels[Screen.SearchScreen] as SearchViewModel){mainViewModel.currentRecipe = it}
         }
-        composable(
-            route = "${Screen.MainScreen.route}/{recipe}",
-            arguments = listOf(navArgument("recipe") {
-                type = RecipeArgType()
-            })
-        ) { navBackStackEntry ->
-            val recipe = navBackStackEntry.arguments?.getString("recipe")?.let { Gson().fromJson(it, Recipe::class.java) }
-            MainScreen(navController, viewModels[Screen.MainScreen] as MainViewModel, recipe!!)
+        composable(route = Screen.MainScreen.route)
+         {
+            MainScreen(navController, mainViewModel)
         }
 
 /*        composable(route = Screen.CalculatorScreen.route + "/{name}/{price}", arguments = listOf(navArgument("name") { type = NavType.StringType },navArgument("price") { type = NavType.FloatType } )){backStackEntry ->

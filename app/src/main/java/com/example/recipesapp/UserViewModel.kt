@@ -20,8 +20,9 @@ class UserViewModel(private val authRepository: AuthRepository): ViewModel() {
     val recipies = _recipies
 
     init {
+        authRepository.getFavorites()
         authRepository.TAG = "AUTH"
-       isUserInitialized.value =  authRepository.checkUser()//make splashScreen and check it there
+        isUserInitialized.value =  authRepository.checkUser()//make splashScreen and check it there
         fetchAllRecipies()
     }
     private fun tryEnterApp(){
@@ -37,7 +38,10 @@ class UserViewModel(private val authRepository: AuthRepository): ViewModel() {
             isLoginCorrect()
             isPasswordCorrect()
             isNameCorrect()
-            authRepository.signInWithEmailAndPassword(login.value,password.value, { Log.d(TAG,"YEEEY")},{Log.d(TAG,it)})
+            val user = User(login.value.hashCode(),login.value,password.value, listOf(Favorites("Beef Tacos".hashCode().toString().hashCode(),"Beef Tacos".hashCode())))
+            authRepository.saveUserToDatabase(user)
+            authRepository.getFavorites()
+            authRepository.signInWithEmailAndPassword(login.value,password.value, { Log.d(TAG,"YEEEY")},{Log.d("Failure",it)})
         }
         catch(e: Exception){
 

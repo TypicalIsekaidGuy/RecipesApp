@@ -58,9 +58,9 @@ fun FavoriteScreen(controller: NavHostController, viewModel: FavoriteViewModel){
         Ingredient("pepp".hashCode(),"pepp",0.5f,true)
     )
     val list = mutableListOf(
-        Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done"),
-        Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done"),
-        Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done"),
+        Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done",""),
+        Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done",""),
+        Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done",""),
     )
     val meals = mutableListOf(
         Meal("Salad",list),
@@ -90,7 +90,7 @@ fun FavoriteTopBar(goBackToScreen: ()-> Unit){
             .align(Alignment.TopStart)
             .padding(8.dp)){
             Icon(
-                painter = painterResource(id = R.drawable.baseline_exit_24),
+                painter = painterResource(id = R.drawable.baseline_exit_20),
                 contentDescription = "Icon 2",
                 modifier = Modifier.clickable { goBackToScreen() },
                 tint = MaterialTheme.colorScheme.primary
@@ -98,7 +98,7 @@ fun FavoriteTopBar(goBackToScreen: ()-> Unit){
         }
         Box(modifier = Modifier.align(Alignment.Center)){
 
-            MaterialText(text = "Favorite Recipe", modifier = Modifier, textStyle = MaterialTheme.typography.displayLarge, textAlign = TextAlign.Center)
+            MaterialText(text = "Favorite Recipe", modifier = Modifier.padding(start = 12.dp), textStyle = MaterialTheme.typography.displayLarge, textAlign = TextAlign.Center)
         }
             Spacer(modifier = Modifier.fillMaxWidth())
 

@@ -54,6 +54,10 @@ class SearchViewModel(val authRepository: AuthRepository): ViewModel() {
     }
     // Function to filter the data based on meal.
     fun sortRecipes(meal: String) {
+        if(meal=="All"){
+            data.value = _data.value.toList()
+            return
+        }
         data.value = _data.value.toList()  // Create a new List with the same data
         val sortedRecipes = data.value.filter { it.meal.toLowerCase() == meal.toLowerCase() }
         data.value = sortedRecipes
@@ -75,10 +79,13 @@ class SearchViewModel(val authRepository: AuthRepository): ViewModel() {
                     Log.d(TAG,data.toString())
                     Log.d(TAG,it.toString())
                     sort_list = meals.mapIndexed { index, meal ->
-                        SortElement(meal, index) {
+                        SortElement(meal, index+1) {
                             sortRecipes(meal)
                         }
                     } as MutableList<SortElement>
+/*
+                    sort_list.add(SortElement("All",0){sortRecipes("All")})
+*/
                 }
                 Log.d("Zalll", _data.value[0].description)
             } catch (e: Exception) {

@@ -68,7 +68,7 @@ fun UserScreen(navController: NavController, userViewModel: UserViewModel){
             SearchOrLoginLine(userViewModel.isLoginScreen)
         }
     }
-    enterAppAuto(userViewModel.isUserInitialized.value, navController)//create corutine scope next
+    enterAppAuto(userViewModel.isUserInitialized.value, navController)//create coroutine scope next
 }
 fun enterAppAuto(isUserInitialized: Boolean, navController: NavController){
     if(isUserInitialized)

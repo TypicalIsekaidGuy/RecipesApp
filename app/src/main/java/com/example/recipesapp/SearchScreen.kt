@@ -66,7 +66,7 @@ import com.example.recipesapp.ui.MaterialText
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
+fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel, setViewmodelRecipe:(Recipe)->Unit) {
 
     val imageResource = R.drawable.test_image // Replace with your image resource name
     val context = LocalContext.current
@@ -353,6 +353,7 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
                     onClick = {
 //                                            navController.navigate(item.route)
                         selectedItemIndex = index
+                        controller.navigate(Screen.FavoriteScreen.route)
 /*                        scope.launch {
                             drawerState.close()
                         }*/
@@ -382,33 +383,38 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
             SearchTopBar(){controller.navigate(Screen.FavoriteScreen.route)}
             SearchSortBar(modifier = Modifier, sortList = sortItems )
             SearchTextField(viewModel, onTextFieldValueChange = { viewModel.onSearchChange(searchText.value) })
-            RecipePreviewList(recipes.value,controller)
+            RecipePreviewList(recipes.value){ recipe ->
+                setViewmodelRecipe(recipe)
+                navigateToMainScreen(controller, recipe)
+            }
         }
     }
 }
 fun navigateToMainScreen(controller: NavHostController, recipe: Recipe){
     Log.d("huy",recipe.toString())
-    controller.navigate("${Screen.MainScreen.route}/{${recipe.toString()}}")
+    controller.navigate("${Screen.MainScreen.route}")
 }
 @Composable
-fun SearchTopBar(onClick:()->Unit){
+fun SearchTopBar(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .padding(top = 32.dp)
-            .fillMaxWidth()){
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxWidth()) {
-            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()){
-                Box(modifier = Modifier
-                    .clip(CircleShape)
-                    .size(48.dp)){
-                    Image(painter = painterResource(id = R.drawable.test_avatar_pic), contentDescription = null )
-                }
-
-
-                Box(modifier = Modifier
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondary)
-                    .padding(8.dp)){
+            .fillMaxWidth()
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.secondary)
+                        .padding(8.dp)
+                ) {
                     Icon(
                         painter = painterResource(id = R.drawable.baseline_menu_32),
                         contentDescription = "Icon 2",
@@ -416,14 +422,28 @@ fun SearchTopBar(onClick:()->Unit){
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
+
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .size(48.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.test_avatar_pic),
+                        contentDescription = null
+                    )
+                }
             }
             MaterialText(
                 text = "Get cooking today!",
-                modifier =  Modifier, textStyle = MaterialTheme.typography.displayLarge, textAlign = TextAlign.Center )
-
+                modifier = Modifier,
+                textStyle = MaterialTheme.typography.displayLarge,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
+
 @Composable
 fun SearchSortBar(modifier: Modifier, sortList: List<SortElement>){
     val pickedId = remember{
@@ -551,7 +571,7 @@ fun SearchTextField(viewModel: SearchViewModel, onTextFieldValueChange: (String)
 }
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RecipePreviewList(recipes: List<Recipe>, controller: NavHostController) {
+fun RecipePreviewList(recipes: List<Recipe>,  onClick: (Recipe) -> Unit) {
     val scrollState = rememberLazyListState()
     val itemCount = recipes.size
 
@@ -567,7 +587,7 @@ fun RecipePreviewList(recipes: List<Recipe>, controller: NavHostController) {
                                 .fillMaxWidth()
                                 .padding(4.dp)
                         */
-        ) { navigateToMainScreen(controller, recipes[page]) }
+        ) { onClick(recipes[page]) }
     }
 }
 

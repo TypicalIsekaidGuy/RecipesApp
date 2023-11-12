@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
             return MainViewModel() as T
         }
     }
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {//if there are problems with back button override it here
         super.onCreate(savedInstanceState)
         viewModelMap[Screen.UserScreen] = ViewModelProvider(this,UserViewModelFactory(authRepository))[UserViewModel::class.java]
         viewModelMap[Screen.FavoriteScreen] = ViewModelProvider(this,FavoriteViewModelFactory(authRepository))[FavoriteViewModel::class.java]

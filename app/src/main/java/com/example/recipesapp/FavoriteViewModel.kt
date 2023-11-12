@@ -16,8 +16,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class FavoriteViewModel(val authRepository: AuthRepository): ViewModel() {
-    private val _data = MutableStateFlow<List<Recipe>>(emptyList())
+    private var _data = MutableStateFlow<List<Recipe>>(emptyList())
     var data: MutableStateFlow<List<Recipe>> =  MutableStateFlow(_data.value.toList())
+    init {
+        viewModelScope.launch {
+            authRepository.getFavorites().collect { favorites ->
+                _data.value = favorites
+                Log.d("ZAAuth", _data.value.toString())
+            }
+        }
+    }
+
 /*    private fun get_data() {
         viewModelScope.launch {
             try {

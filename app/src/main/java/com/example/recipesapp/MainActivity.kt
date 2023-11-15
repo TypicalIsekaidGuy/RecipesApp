@@ -1,11 +1,19 @@
 package com.example.recipesapp
 
+import android.content.Context
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.recipesapp.ui.theme.RecipesAppTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     var viewModelMap: HashMap<Screen, ViewModel> = HashMap()
@@ -36,7 +44,23 @@ class MainActivity : ComponentActivity() {
         viewModelMap[Screen.FavoriteScreen] = ViewModelProvider(this,FavoriteViewModelFactory(authRepository))[FavoriteViewModel::class.java]
         viewModelMap[Screen.SearchScreen] = ViewModelProvider(this,SearchViewModelFactory(authRepository))[SearchViewModel::class.java]
         viewModelMap[Screen.MainScreen] = ViewModelProvider(this,MainViewModelFactory(authRepository))[MainViewModel::class.java]
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
 
+                (viewModelMap[Screen.UserScreen] as UserViewModel).message.collect { message ->
+                    message?.let {
+                        Toast.makeText(applicationContext, it, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+
+
+        installSplashScreen().apply {
+            setKeepOnScreenCondition{
+                (viewModelMap[Screen.UserScreen] as UserViewModel).isLoading.value
+            }
+        }
         setContent {
             RecipesAppTheme {
                 Navigation(viewModels = viewModelMap)
@@ -44,4 +68,5 @@ class MainActivity : ComponentActivity() {
 
         }
     }
+
 }

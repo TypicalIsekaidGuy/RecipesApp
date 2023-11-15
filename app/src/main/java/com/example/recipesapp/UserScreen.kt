@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +46,7 @@ import com.example.recipesapp.ui.MaterialText
 
 @Composable
 fun UserScreen(navController: NavController, userViewModel: UserViewModel){
+    enterAppAuto(userViewModel.isUserInitialized.value, navController)//create coroutine scope next
     Column(modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 24.dp)
@@ -60,15 +62,16 @@ fun UserScreen(navController: NavController, userViewModel: UserViewModel){
             }
 
         }
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp),horizontalAlignment = Alignment.CenterHorizontally,){
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp),horizontalAlignment = Alignment.CenterHorizontally){
             ConfirmButton {
-                userViewModel.confirmAuth()
+                if(userViewModel.confirmAuth())
                 navController.navigate(Screen.SearchScreen.route)
             }
             SearchOrLoginLine(userViewModel.isLoginScreen)
         }
     }
-    enterAppAuto(userViewModel.isUserInitialized.value, navController)//create coroutine scope next
+
+
 }
 fun enterAppAuto(isUserInitialized: Boolean, navController: NavController){
     if(isUserInitialized)

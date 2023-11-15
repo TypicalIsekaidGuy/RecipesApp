@@ -7,8 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 
-class MainViewModel(val authRepository: AuthRepository): ViewModel() {
+class MainViewModel(private val authRepository: AuthRepository): ViewModel() {
     var currentRecipe by authRepository.currentRecipe
+    var currentName = currentRecipe.name
     val servings = mutableStateOf(1)
     private val _totalPrepTime = currentRecipe.prepareTime - 10
     private val totalPrepTime = mutableStateOf(_totalPrepTime)
@@ -17,7 +18,7 @@ class MainViewModel(val authRepository: AuthRepository): ViewModel() {
     private val totalCookTime = mutableStateOf(_totalCookTime)
     var strTotalCookTime by mutableStateOf(totalCookTime.value.minsToString())
     var ingredientText by mutableStateOf(getIngredients())
-    var isFavorite = authRepository.isCurrentRecipeFavorite(currentRecipe)
+    var isFavorite = mutableStateOf(authRepository.isCurrentRecipeFavorite(currentRecipe))
 
     private fun getIngredients(): String {
         val ingredientsList: List<Ingredient> = // your list of ingredients
@@ -62,15 +63,16 @@ class MainViewModel(val authRepository: AuthRepository): ViewModel() {
         return ""
     }
     fun addFavorite(recipe: Recipe){
-/*
-        authRepository.addCurrentRecipeFromFavorite(recipe)
-*/
+        authRepository.addCurrentRecipeToFavorite(recipe)
     }
     fun removeFavorite(recipe: Recipe){
-/*
         authRepository.removeCurrentRecipeFromFavorite(recipe)
-*/
-
+    }
+    fun checkRecipe(){
+        if(currentName!=currentRecipe.name){
+            currentName = currentRecipe.name
+            isFavorite.value = authRepository.isCurrentRecipeFavorite(currentRecipe)
+        }
     }
 
 }

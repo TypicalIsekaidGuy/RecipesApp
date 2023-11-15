@@ -32,6 +32,7 @@ class AuthRepository() {
         FirebaseAuth.getInstance()
     }
     val recipes = mutableListOf<Recipe>()
+    var recipess = listOf<Recipe>()
     var favorites = mutableListOf<Recipe>()
     private val firebaseData = Firebase.database("https://recipiesapp-b482b-default-rtdb.europe-west1.firebasedatabase.app/").reference
     val list_ingredients1 = listOf<Ingredient>(
@@ -170,13 +171,19 @@ class AuthRepository() {
         }
     }
 
-    fun getRecipesFromDatabase(): Flow<List<Recipe>> = flow {
+    fun getRecipesFromDatabase(isLoading: MutableState<Boolean>): Flow<List<Recipe>> = flow {
+
+        Log.d("AuthRepo","stated repo")
         val recipes = mutableListOf<Recipe>()
 
         try {
+
+            Log.d("AuthRepo","stated repo")
             val dataSnapshot = firebaseData.child("recipes").get().await()
             if (dataSnapshot.exists()) {
                 for (children in dataSnapshot.children) {
+
+                    Log.d("AuthRepo","stated repo")
                     val recipeMap = children.value as Map<String, Any>
 
                     // Extract data from the recipeMap
@@ -214,6 +221,10 @@ class AuthRepository() {
             }
 
             emit(recipes)
+            Log.d(TAG,"done")
+            Log.d(TAG,recipes.toString())
+            recipess = recipes
+            isLoading.value = false
 /*
             Log.d("ZAAuth", recipes.toString())
 */
@@ -253,7 +264,7 @@ class AuthRepository() {
             val favoriteMap = mutableMapOf<String, Any>()
             favoriteMap["id"] = favorite.id
             favoriteMap["recipe_id"] = favorite.recipe_id
-            favoritesList.add(favorite.id,favoriteMap)
+            favoritesList.add(favoriteMap)
         }
         userMap["favorites"] = favoritesList
         // Push the user data to the "users" node in Firebase
@@ -261,6 +272,7 @@ class AuthRepository() {
             firebaseData.child("users").child(user.id.toString()).updateChildren(userMap)
         } catch (e: Exception) {
             Log.d(TAG, e.message!!)
+            e.printStackTrace()
         }
     }
 
@@ -268,7 +280,6 @@ class AuthRepository() {
     fun getFavorites(): Flow<List<Recipe>> = flow {
         if (favorites.isEmpty()) {
             Log.d("ZAAuth","STARTED")
-            try {
                 val dataSnapshot = firebaseData.child("users").child(currentUser()?.email!!.hashCode().toString()).get().await()
                 if (dataSnapshot.exists()) {
                     val user = dataSnapshot.value as Map<String, Any>
@@ -290,14 +301,12 @@ class AuthRepository() {
                     Log.d("ZAAuth", favorites.toString())
                 }
 
-            } catch (e: Exception) {
-                Log.d(TAG, e.message.toString())
-                e.printStackTrace()
-            }
+
         }
     }.flowOn(Dispatchers.IO)
 
     fun isCurrentRecipeFavorite(recipe: Recipe):Boolean{
+        Log.d(TAG,favorites.toString())
         return recipe in favorites
     }
 
@@ -308,9 +317,12 @@ class AuthRepository() {
         )
 
         // Check if the recipe is already in favorites
+        Log.d(TAG,"not yet Added")
         if (!favorites.contains(recipe)) {
             // Add the recipe to the local favorites list
+            Log.d(TAG,"Added")
             favorites.add(recipe)
+            Log.d(TAG,isCurrentRecipeFavorite(recipe).toString())
 
             // Update the user's favorites in the database
             updateUserFavoritesInDatabase(favoriteMap, true)
@@ -322,6 +334,7 @@ class AuthRepository() {
         if (favorites.contains(recipe)) {
             // Remove the recipe from the local favorites list
             favorites.remove(recipe)
+            Log.d(TAG,"Removed")
 
             // Update the user's favorites in the database
             updateUserFavoritesInDatabase(mapOf("id" to recipe.id), false)
@@ -330,8 +343,8 @@ class AuthRepository() {
 
     private fun updateUserFavoritesInDatabase(favoriteMap: Map<String, Any>, isAdding: Boolean) {
         // Update the user's favorites in the "users" node in Firebase
-        try {
-/*            val userFavoritesRef = firebaseData.child("users").child(currentUser()?.id.toString()).child("favorites")
+/*        try {
+           val userFavoritesRef = firebaseData.child("users").child(currentUser()?.id.toString()).child("favorites")
 
             if (isAdding) {
                 // Add the new favorite to the database
@@ -351,10 +364,10 @@ class AuthRepository() {
                         }
                     }
                 )
-            }*/
+            }
         } catch (e: Exception) {
             Log.d(TAG, "Error updating user favorites in the database: ${e.message}")
-        }
+        }*/
     }
 
 

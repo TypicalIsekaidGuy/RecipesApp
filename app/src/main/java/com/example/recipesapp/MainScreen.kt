@@ -36,6 +36,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,13 +68,13 @@ fun MainScreen(controller: NavHostController, viewModel: MainViewModel) {
     val ingredientText = viewModel.ingredientText
     val descriptionText = recipe.description
     val presentationText = recipe.presentation
-    var isFavorite = remember {mutableStateOf(true)}
-    isFavorite.value = viewModel.isFavorite
+    val isFavorite = remember{viewModel.isFavorite}
 
 /*
     val recipe =         Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done")
 */
     val servings by viewModel.servings
+    viewModel.checkRecipe()
     LazyColumn(modifier = Modifier
         .fillMaxWidth()) {
         item{
@@ -109,7 +110,7 @@ fun MainScreen(controller: NavHostController, viewModel: MainViewModel) {
 
                 DescriptionItem("Ingridients", ingredientText, MaterialTheme.colorScheme.secondary)
                 Spacer(modifier = Modifier.height((-8).dp)) // Adjust the negative margin as needed
-                DescriptionItem("Description", descriptionText, MaterialTheme.colorScheme.surfaceVariant, topBackgroundColor = MaterialTheme.colorScheme.secondary)
+                DescriptionItem("Description", presentationText, MaterialTheme.colorScheme.surfaceVariant, topBackgroundColor = MaterialTheme.colorScheme.secondary)
 
             }
         }
@@ -149,11 +150,12 @@ fun MainTopBar(goBackToScreen: ()-> Unit,add: ()-> Unit,remove: ()-> Unit,isFavo
                         painter = painterResource(id = R.drawable.baseline_lock_24),
                         contentDescription = "Icon 2",
                         modifier = Modifier.clickable {
-                                                      if(isFavorite.value)
-                                                          add()
+                            isFavorite.value = !isFavorite.value
+                            Log.d("AuthRepository",isFavorite.value.toString())
+                            if(isFavorite.value)
+                                add()
                             else
                                 remove()
-                            isFavorite.value = !isFavorite.value
                         },
                         tint = if(isFavorite.value) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                     )
@@ -233,7 +235,9 @@ fun DetailsClarification(name: String, time: String){
             modifier = Modifier.align(Alignment.CenterHorizontally),
             textStyle = MaterialTheme.typography.headlineMedium)
         MaterialText(text = time,
-            modifier = Modifier.padding(top = 12.dp).align(Alignment.CenterHorizontally),
+            modifier = Modifier
+                .padding(top = 12.dp)
+                .align(Alignment.CenterHorizontally),
             textStyle = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
 
     }
@@ -292,17 +296,22 @@ fun DescriptionItem(
             enter = expandVertically(),
             exit =shrinkVertically()
         ) {
-            Box(modifier = Modifier
-                .background(backgroundColor)){
+            Box(
+                modifier = Modifier
+                    .background(backgroundColor)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
 
-                MaterialText(
-                    text = "ttttttttttttttttttttttttttttt\nttttttttttttttttttt",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    textStyle = MaterialTheme.typography.headlineMedium
-                )
+                    MaterialText(
+                        text = text,
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        textStyle = MaterialTheme.typography.headlineMedium,
+                        lineHeight = 24.sp
+                    )
+                }
             }
         }
+
     }
 }

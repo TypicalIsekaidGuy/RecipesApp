@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -31,9 +32,10 @@ class AuthRepository() {
     private val auth: FirebaseAuth by lazy {
         FirebaseAuth.getInstance()
     }
-    val recipes = mutableListOf<Recipe>()
+    val viewedList = mutableMapOf<String,Boolean>()
     var recipess = listOf<Recipe>()
-    var favorites = mutableListOf<Recipe>()
+    var favorites = mutableStateOf(mutableListOf<Recipe>())
+    var favoriteMeals = mutableStateOf(mutableListOf<Meal>())
     private val firebaseData = Firebase.database("https://recipiesapp-b482b-default-rtdb.europe-west1.firebasedatabase.app/").reference
     val list_ingredients1 = listOf<Ingredient>(
         Ingredient("Lettuce".hashCode(), "Lettuce", 2.0f, true),)
@@ -170,20 +172,21 @@ class AuthRepository() {
             }
         }
     }
-
-    fun getRecipesFromDatabase(isLoading: MutableState<Boolean>): Flow<List<Recipe>> = flow {
-
-        Log.d("AuthRepo","stated repo")
+    suspend fun getRecipesFromDatabase(isLoading: MutableState<Boolean>){
         val recipes = mutableListOf<Recipe>()
-
+        Log.d(TAG,"Started")
         try {
-
-            Log.d("AuthRepo","stated repo")
             val dataSnapshot = firebaseData.child("recipes").get().await()
+            Log.d(TAG,"continue")
             if (dataSnapshot.exists()) {
-                for (children in dataSnapshot.children) {
+                Log.d(TAG,"continue")
+                if(dataSnapshot.children.count() == recipess.size){
+                    return
+                }
 
-                    Log.d("AuthRepo","stated repo")
+                for (children in dataSnapshot.children) {
+                    Log.d(TAG,"continue")
+
                     val recipeMap = children.value as Map<String, Any>
 
                     // Extract data from the recipeMap
@@ -217,14 +220,14 @@ class AuthRepository() {
                         id.toInt(), name, image!!, prepareTime.toInt(), views.toInt(), meal, ingredientsList, description, presentation
                     )
                     recipes.add(recipe)
+                    viewedList[recipe.name] = false
+
+                    Log.d(TAG,"Added")
                 }
             }
 
-            emit(recipes)
-            Log.d(TAG,"done")
-            Log.d(TAG,recipes.toString())
             recipess = recipes
-            isLoading.value = false
+            Log.d(TAG,"DONE")
 /*
             Log.d("ZAAuth", recipes.toString())
 */
@@ -232,7 +235,7 @@ class AuthRepository() {
             Log.d(TAG, e.message.toString())
             e.printStackTrace()
         }
-    }.flowOn(Dispatchers.IO)
+    }
 
 
 
@@ -264,7 +267,7 @@ class AuthRepository() {
             val favoriteMap = mutableMapOf<String, Any>()
             favoriteMap["id"] = favorite.id
             favoriteMap["recipe_id"] = favorite.recipe_id
-            favoritesList.add(favoriteMap)
+            favoritesList.add(favorite.id,favoriteMap)
         }
         userMap["favorites"] = favoritesList
         // Push the user data to the "users" node in Firebase
@@ -272,103 +275,154 @@ class AuthRepository() {
             firebaseData.child("users").child(user.id.toString()).updateChildren(userMap)
         } catch (e: Exception) {
             Log.d(TAG, e.message!!)
-            e.printStackTrace()
         }
     }
 
 
-    fun getFavorites(): Flow<List<Recipe>> = flow {
-        if (favorites.isEmpty()) {
+    suspend fun getFavorites(){
+        if (favorites.value.isEmpty()) {
             Log.d("ZAAuth","STARTED")
+            try {
                 val dataSnapshot = firebaseData.child("users").child(currentUser()?.email!!.hashCode().toString()).get().await()
+                Log.d(TAG,currentUser()?.email!!.hashCode().toString())
                 if (dataSnapshot.exists()) {
                     val user = dataSnapshot.value as Map<String, Any>
-                    val favors = user["favorites"] as List<Map<String, String>>
+                    val favors = user["favorites"] as List<Map<String, Long>>
                     val favoritesId = mutableListOf<String>()
-
-                    Log.d("ZAAuth",
-                        recipes.find { it.id==favors.first()["recipe_id"]?.toInt()}.toString()
-                    )
                     for (favorite in favors) {
-                        favoritesId.add(favorite["recipe_id"]!!)
+                        Log.d("ZAAuth",favorite.toString())
+                        favorite["recipe_id"]?.let { favoritesId.add(it.toString()) }
+                        Log.d("ZAAuth",favoritesId.toString())
                     }
 
 
                     // Now fetch recipes based on the IDs
-                    val recipes = recipes.toList().filter{favoritesId.contains(it.id.toString())}
-                    favorites = recipes as MutableList<Recipe>
-                    emit(favorites)
+                    val recipes = recipess.toList().filter{favoritesId.contains(it.id.toString())}
+                    Log.d("ZAAuth", recipes.toString())
+                    favorites.value = recipes as MutableList<Recipe>
+                    favoriteMeals.value = sortInMeals(favorites.value)
+
                     Log.d("ZAAuth", favorites.toString())
                 }
 
-
+            } catch (e: Exception) {
+                Log.d(TAG, e.message.toString())
+                e.printStackTrace()
+            }
         }
-    }.flowOn(Dispatchers.IO)
+    }
+    fun sortInMeals(_data: MutableList<Recipe>):  MutableList<Meal>{
+        Log.d("Favorite",_data.toString())
+        // Group recipes by meal name
+        val groupedByMeal = _data.groupBy { it.meal }
+
+        // Map the grouped entries to create a list of Meal objects
+        val meals = groupedByMeal.map { (mealName, recipes) ->
+            Meal(mealName, recipes.toMutableList())
+        }
+        return meals as MutableList<Meal>
+    }
 
     fun isCurrentRecipeFavorite(recipe: Recipe):Boolean{
         Log.d(TAG,favorites.toString())
-        return recipe in favorites
+        return recipe in favorites.value
     }
 
     fun addCurrentRecipeToFavorite(recipe: Recipe) {
-        val favoriteMap = mapOf(
-            "id" to recipe.id,
-            "recipe_id" to recipe.id
-        )
 
         // Check if the recipe is already in favorites
-        Log.d(TAG,"not yet Added")
-        if (!favorites.contains(recipe)) {
+        if (!favorites.value.contains(recipe)) {
             // Add the recipe to the local favorites list
-            Log.d(TAG,"Added")
-            favorites.add(recipe)
-            Log.d(TAG,isCurrentRecipeFavorite(recipe).toString())
+            favorites.value.add(recipe)
+            Log.d("ZAAuth", favorites.toString())
+
+            favoriteMeals.value = sortInMeals(favorites.value)
+            Log.d(TAG,(recipe in favorites.value).toString())
 
             // Update the user's favorites in the database
-            updateUserFavoritesInDatabase(favoriteMap, true)
         }
     }
 
     fun removeCurrentRecipeFromFavorite(recipe: Recipe) {
         // Check if the recipe is in favorites
-        if (favorites.contains(recipe)) {
+        if (favorites.value.contains(recipe)) {
             // Remove the recipe from the local favorites list
-            favorites.remove(recipe)
-            Log.d(TAG,"Removed")
+            favorites.value.remove(recipe)
+            favoriteMeals.value = sortInMeals(favorites.value)
 
             // Update the user's favorites in the database
-            updateUserFavoritesInDatabase(mapOf("id" to recipe.id), false)
         }
     }
 
-    private fun updateUserFavoritesInDatabase(favoriteMap: Map<String, Any>, isAdding: Boolean) {
-        // Update the user's favorites in the "users" node in Firebase
-/*        try {
-           val userFavoritesRef = firebaseData.child("users").child(currentUser()?.id.toString()).child("favorites")
-
-            if (isAdding) {
-                // Add the new favorite to the database
-                userFavoritesRef.push().setValue(favoriteMap)
-            } else {
-                // Find and remove the specific favorite from the database
-                userFavoritesRef.orderByChild("id").equalTo(favoriteMap["id"]).addListenerForSingleValueEvent(
-                    object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            for (childSnapshot in snapshot.children) {
-                                childSnapshot.ref.removeValue()
-                            }
-                        }
-
-                        override fun onCancelled(error: DatabaseError) {
-                            Log.d(TAG, "Error removing favorite: ${error.message}")
-                        }
-                    }
-                )
-            }
-        } catch (e: Exception) {
-            Log.d(TAG, "Error updating user favorites in the database: ${e.message}")
-        }*/
+    fun addCurrentRecipeToSeen(recipe: Recipe) {
+        if(viewedList.contains(recipe.name)){
+            if(!viewedList[recipe.name]!!)
+                viewedList[recipe.name] = true
+        }
     }
+
+    fun updateFavoritesInDatabase() {
+        try {
+            // Get the current user's email hash as a unique identifier
+            val userHash = currentUser()?.email!!.hashCode().toString()
+
+            // Get the reference to the user's data in the database
+            val userRef = firebaseData.child("users").child(userHash)
+
+            // Get the list of recipe IDs from the current favorites
+            val favoriteIds = favorites.value.map { it.id.toString() }
+
+            // Create a list of maps representing the favorites in the correct format
+            val favoritesList = favoriteIds.map { recipeId ->
+                mapOf("id" to recipeId.hashCode().toLong())
+                mapOf("recipe_id" to recipeId.toLong())
+            }
+
+            // Update the 'favorites' node in the user's data with the new favorites list
+            userRef.updateChildren(mapOf("favorites" to favoritesList))
+
+            // Log success or handle other actions if needed
+            Log.d("ZAAuth", "Favorites updated and saved to the database.")
+
+        } catch (e: Exception) {
+            // Log the error or handle it appropriately
+            Log.e(TAG, "Error updating favorites: ${e.message}", e)
+        }
+    }
+
+
+    fun setCurrentRecipe(recipe: Recipe){
+        currentRecipe.value = recipe
+
+    }
+
+    fun updateSeenInDatabase() {
+        for (entry in viewedList.entries) {
+            val recipeName = entry.key
+            val viewed = entry.value
+
+            if (!viewed) {
+                continue
+            }
+
+            try {
+                // Use the Firebase SDK to increment the "views" field
+                val updates: MutableMap<String, Any> = hashMapOf(
+                    "recipes/$recipeName/views" to ServerValue.increment(1)
+                )
+
+                firebaseData.updateChildren(updates)
+                viewedList[recipeName] = false
+
+                Log.d("Zaauth", "Incremented views for recipe: $recipeName")
+            } catch (e: Exception) {
+                Log.e("Zaauth", "Error updating views for recipe: $recipeName, ${e.message}", e)
+            }
+        }
+    }
+
+
+
 
 
 

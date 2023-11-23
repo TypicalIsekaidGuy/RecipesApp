@@ -1,6 +1,8 @@
 package com.example.recipesapp
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,13 +14,12 @@ import kotlinx.coroutines.launch
 class SearchViewModel(val authRepository: AuthRepository): ViewModel() {
     val TAG = "SearchViewModel"
 
-    init {
+/*    init {
         Log.d(TAG,authRepository.TAG)
         get_data()
-    }
-
-    private val _data = MutableStateFlow<List<Recipe>>(emptyList())
-    var data: MutableStateFlow<List<Recipe>> =  MutableStateFlow(_data.value.toList())
+    }*/
+private val _data: MutableState<List<Recipe>> = mutableStateOf(authRepository.recipess)
+    val data: MutableState<List<Recipe>> = mutableStateOf(_data.value)
     private var _originalData: List<Recipe> = emptyList()
     var sort_list : MutableList<SortElement> = mutableListOf()
 
@@ -33,7 +34,7 @@ class SearchViewModel(val authRepository: AuthRepository): ViewModel() {
 
             _searchText.value= text
             Log.d(TAG,_searchText.value)
-            data.value = _data.value.toList()
+            data.value = _data.value.toList() as MutableList<Recipe>
             val filteredData = if (_searchText.value.isBlank()) {
                 // If the search text is empty, show all data
                 data.value.toList()
@@ -55,19 +56,47 @@ class SearchViewModel(val authRepository: AuthRepository): ViewModel() {
     // Function to filter the data based on meal.
     fun sortRecipes(meal: String) {
         if(meal=="All"){
-            data.value = _data.value.toList()
+            data.value = _data.value.toList() as MutableList<Recipe>
             return
         }
-        data.value = _data.value.toList()  // Create a new List with the same data
+        data.value =
+            _data.value.toList() as MutableList<Recipe>  // Create a new List with the same data
         val sortedRecipes = data.value.filter { it.meal.toLowerCase() == meal.toLowerCase() }
-        data.value = sortedRecipes
+        data.value = sortedRecipes as MutableList<Recipe>
 
         Log.d(TAG,_data.toString())
         Log.d(TAG,data.toString())
     }
 
+/*    fun loadRecipes(){
+        Log.d("Auth1",_data.value.isEmpty().toString())
+        Log.d("Auth2",authRepository.recipess.toString())
+        Log.d("Auth3",authRepository.recipess.toString())
+        if(_data.value.isEmpty()){
+            _data.value = authRepository.recipess.toMutableList()
+            data.value = _data.value
+            val meals = _data.value.map { it.meal }.distinct()
 
-    private fun get_data() {
+            sort_list = meals.mapIndexed { index, meal ->
+                SortElement(meal, index+1) {
+                    sortRecipes(meal)
+                }
+            } as MutableList<SortElement>
+        }
+    }*/
+    private fun loadUpFromData(){
+        val meals = _data.value.map { it.meal }.distinct()
+
+        sort_list = meals.mapIndexed { index, meal ->
+            SortElement(meal, index+1) {
+                sortRecipes(meal)
+            }
+        } as MutableList<SortElement>}
+
+
+
+
+/*    private fun get_data() {
         viewModelScope.launch {
             try {
                 authRepository.getRecipesFromDatabase().collect {
@@ -83,18 +112,27 @@ class SearchViewModel(val authRepository: AuthRepository): ViewModel() {
                             sortRecipes(meal)
                         }
                     } as MutableList<SortElement>
-/*
+*//*
                     sort_list.add(SortElement("All",0){sortRecipes("All")})
-*/
+*//*
                 }
                 Log.d("Zalll", _data.value[0].description)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
-    }
+    }*/
     fun setCurrentRecipe(recipe: Recipe){
-        authRepository.currentRecipe.value = recipe
+
+        authRepository.setCurrentRecipe(recipe)
+        authRepository.addCurrentRecipeToSeen(recipe)
+
+    }
+    fun setRecipes(){
+        Log.d(TAG,authRepository.recipess.toString())
+        _data.value = authRepository.recipess
+        data.value = _data.value
+        loadUpFromData()
     }
 
 }

@@ -1,5 +1,6 @@
 package com.example.recipesapp
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,35 +44,72 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.recipesapp.ui.MaterialText
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieClipSpec
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 
 @Composable
 fun UserScreen(navController: NavController, userViewModel: UserViewModel){
-    enterAppAuto(userViewModel.isUserInitialized.value, navController)//create coroutine scope next
+    var isInitialized by userViewModel.isUserInitialized
+    var isLoadingFavorites by userViewModel.isLoadingFavorites
     Column(modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 24.dp)
         .padding(top = 32.dp), horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp)) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)) {
-            TopUserBar()
-            EditTextLine(modifier = Modifier, text = userViewModel.login.value, onTextChanged = {userViewModel.login.value = it}, hint = "Login")
-            EditTextLine(modifier = Modifier, text = userViewModel.password.value, onTextChanged = {userViewModel.password.value = it}, hint = "Password")
-            if(userViewModel.isLoginScreen.value){
-                EditTextLine(modifier = Modifier, text = userViewModel.name.value, onTextChanged = {userViewModel.name.value = it}, hint = "Name")
-            }
+        if(!isInitialized){
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                TopUserBar()
+                EditTextLine(modifier = Modifier, text = userViewModel.login.value, onTextChanged = {userViewModel.login.value = it}, hint = "Login")
+                EditTextLine(modifier = Modifier, text = userViewModel.password.value, onTextChanged = {userViewModel.password.value = it}, hint = "Password")
+                if(userViewModel.isLoginScreen.value){
+                    EditTextLine(modifier = Modifier, text = userViewModel.name.value, onTextChanged = {userViewModel.name.value = it}, hint = "Name")
+                }
 
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp),horizontalAlignment = Alignment.CenterHorizontally){
-            ConfirmButton {
-                if(userViewModel.confirmAuth())
-                navController.navigate(Screen.SearchScreen.route)
             }
-            SearchOrLoginLine(userViewModel.isLoginScreen)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp),horizontalAlignment = Alignment.CenterHorizontally,){
+                ConfirmButton {
+                    enterAppAuto(userViewModel.isUserInitialized.value, navController)//create coroutine scope next
+
+                    userViewModel.confirmAuth()
+                    navController.navigate(Screen.SearchScreen.route)
+
+                }
+                SearchOrLoginLine(userViewModel.isLoginScreen)
+            }
         }
+        else{
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(24.dp)) {
+                TopUserBar()
+                LoadingAnimation()
+                LaunchedEffect(key1 = true){
+                    Log.d("USER_VIEW_MODEL","Stared fav")
+                    userViewModel.loadFavorites()
+                    if(!isLoadingFavorites)
+                        enterAppAuto(isInitialized,navController)
+                }
+            }
+        }
+
     }
+}
+@Composable
+fun LoadingAnimation() {
+    val composition by rememberLottieComposition(
+        spec = LottieCompositionSpec.RawRes(resId = R.raw.running_main)
+    )
 
-
+    // render the animation
+    LottieAnimation(
+        modifier = Modifier.size(size = 240.dp),
+        composition = composition,
+    )
 }
 fun enterAppAuto(isUserInitialized: Boolean, navController: NavController){
     if(isUserInitialized)

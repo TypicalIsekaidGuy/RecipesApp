@@ -2,8 +2,6 @@ package com.example.recipesapp
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -12,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.math.log
 
-class UserViewModel(private val authRepository: AuthRepository): ViewModel() {
+class UserViewModel(private val authRepository: AuthRepository, private val setRecipes: () -> Unit): ViewModel() {
     val TAG = "USER_VIEW_MODEL"
     val isLoginScreen =  mutableStateOf(true)
     val login =  mutableStateOf("")
@@ -20,54 +18,63 @@ class UserViewModel(private val authRepository: AuthRepository): ViewModel() {
     val name = mutableStateOf("")
     private val bannedWords = mutableListOf("fuck")
     val isUserInitialized =  mutableStateOf(false)
-    private val statusMessage = MutableLiveData<Event<String>>()
-    val isLoading = mutableStateOf(true)
-
+    val isLoading =  mutableStateOf(true)
+    val isLoadingFavorites =  mutableStateOf(false)
     private val _statusMessage = MutableStateFlow<String?>(null)
-
     val message: StateFlow<String?>
         get() = _statusMessage
-
 
     private val _recipies = mutableListOf<String>()
     val recipies = _recipies
 
     init {
-        Log.d(TAG,"Started")
+        /*authRepository.getFavorites()*/
         viewModelScope.launch {
             try {
-                authRepository.getRecipesFromDatabase(isLoading).collect{}
-                Log.d(TAG,authRepository.recipes.isEmpty().toString())
 
-                isUserInitialized.value =  authRepository.checkUser()
-            } catch (e: Exception) {
-                e.printStackTrace()
+                authRepository.getRecipesFromDatabase(isLoading)
+                isUserInitialized.value =  authRepository.checkUser()//make splashScreen and check it there
+                Log.d(TAG,authRepository.recipess.toString())
+                setRecipes()
+                isLoading.value = false
+            }
+            catch (e:Exception){
+                Log.e(TAG,"error",e)
             }
         }
-
     }
     private fun tryEnterApp(){
 
     }
+    fun loadFavorites(){
+        viewModelScope.launch {
+            try {
 
-    fun confirmAuth():Boolean{
+                authRepository.getFavorites()
+            }
+            catch (e:Exception){
+                Log.e(TAG,"error",e)
+            }
+        }
+    }
+
+    fun confirmAuth(){
         try{
+            authRepository.TAG = "AUTH"
             isLoginCorrect()
             isPasswordCorrect()
             isNameCorrect()
             val user = User(login.value.hashCode(),login.value,password.value, listOf(Favorites("Beef Tacos".hashCode().toString().hashCode(),"Beef Tacos".hashCode())))
             authRepository.saveUserToDatabase(user)
+            /*authRepository.getFavorites()*/
             authRepository.signInWithEmailAndPassword(login.value,password.value, { Log.d(TAG,"YEEEY")},{Log.d("Failure",it)})
-            Log.d(TAG,"yes")
-            return true
         }
         catch(e: Exception){
-Log.d(TAG,e.message!!)
-        e.printStackTrace()}
+
+        }
         finally {
 
         }
-        return false
     }
     private fun isLoginCorrect(){
         if(!("@"  in login.value &&"." in login.value))
@@ -80,12 +87,12 @@ Log.d(TAG,e.message!!)
     }
     private fun isNameCorrect(){
         if(name.value.lowercase() in bannedWords)
-            throw IncorrectWordException("The name is incorrect")
+            throw IncorrectWordException("The password is incorrect")
 
     }
     inner class IncorrectWordException(message:String): Exception(message){
         init {
-            statusMessage.value = Event(message)
+            _statusMessage.value =message
         }
     }
 }

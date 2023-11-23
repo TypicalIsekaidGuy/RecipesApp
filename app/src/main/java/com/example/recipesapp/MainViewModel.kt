@@ -1,5 +1,7 @@
 package com.example.recipesapp
 
+import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -7,9 +9,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 
-class MainViewModel(private val authRepository: AuthRepository): ViewModel() {
+class MainViewModel(val authRepository: AuthRepository): ViewModel() {
     var currentRecipe by authRepository.currentRecipe
-    var currentName = currentRecipe.name
     val servings = mutableStateOf(1)
     private val _totalPrepTime = currentRecipe.prepareTime - 10
     private val totalPrepTime = mutableStateOf(_totalPrepTime)
@@ -18,7 +19,8 @@ class MainViewModel(private val authRepository: AuthRepository): ViewModel() {
     private val totalCookTime = mutableStateOf(_totalCookTime)
     var strTotalCookTime by mutableStateOf(totalCookTime.value.minsToString())
     var ingredientText by mutableStateOf(getIngredients())
-    var isFavorite = mutableStateOf(authRepository.isCurrentRecipeFavorite(currentRecipe))
+    val isFavorite: MutableState<Boolean>
+        get() =mutableStateOf(authRepository.isCurrentRecipeFavorite(currentRecipe))
 
     private fun getIngredients(): String {
         val ingredientsList: List<Ingredient> = // your list of ingredients
@@ -52,27 +54,12 @@ class MainViewModel(private val authRepository: AuthRepository): ViewModel() {
         strTotalPrepTime = totalPrepTime.value.minsToString()
         strTotalCookTime = totalCookTime.value.minsToString()
     }
-    private fun Int.minsToString(): String{
-        when{
-            this<60 -> return "$this mins"
-            this == 60 -> return "1 hour"
-            this in 61..119 -> return "1 hour \n${this%60} mins"
-            this> 119 && this%60==0 -> return "${this/60} hours"
-            this> 120 && this%60!=0 -> return "${this/60} hours \n${this%60} mins"
-        }
-        return ""
-    }
     fun addFavorite(recipe: Recipe){
         authRepository.addCurrentRecipeToFavorite(recipe)
     }
     fun removeFavorite(recipe: Recipe){
         authRepository.removeCurrentRecipeFromFavorite(recipe)
-    }
-    fun checkRecipe(){
-        if(currentName!=currentRecipe.name){
-            currentName = currentRecipe.name
-            isFavorite.value = authRepository.isCurrentRecipeFavorite(currentRecipe)
-        }
+
     }
 
 }

@@ -1,13 +1,12 @@
 package com.example.recipesapp
 
-import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.material3.Surface
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -18,9 +17,10 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     var viewModelMap: HashMap<Screen, ViewModel> = HashMap()
     private val authRepository: AuthRepository = AuthRepository()
-    class UserViewModelFactory(private val authRepository: AuthRepository) : ViewModelProvider.Factory {
+    class UserViewModelFactory(private val authRepository: AuthRepository,
+                               private val setRecipes: () -> Unit) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return UserViewModel(authRepository) as T
+            return UserViewModel(authRepository,setRecipes) as T
         }
     }
     class FavoriteViewModelFactory(private val authRepository: AuthRepository) : ViewModelProvider.Factory {
@@ -40,13 +40,13 @@ class MainActivity : ComponentActivity() {
     }
     override fun onCreate(savedInstanceState: Bundle?) {//if there are problems with back button override it here
         super.onCreate(savedInstanceState)
-        viewModelMap[Screen.UserScreen] = ViewModelProvider(this,UserViewModelFactory(authRepository))[UserViewModel::class.java]
         viewModelMap[Screen.FavoriteScreen] = ViewModelProvider(this,FavoriteViewModelFactory(authRepository))[FavoriteViewModel::class.java]
         viewModelMap[Screen.SearchScreen] = ViewModelProvider(this,SearchViewModelFactory(authRepository))[SearchViewModel::class.java]
         viewModelMap[Screen.MainScreen] = ViewModelProvider(this,MainViewModelFactory(authRepository))[MainViewModel::class.java]
+        viewModelMap[Screen.UserScreen] = ViewModelProvider(this,UserViewModelFactory(authRepository,
+            { (viewModelMap[Screen.SearchScreen] as SearchViewModel).setRecipes() }))[UserViewModel::class.java]
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
-
                 (viewModelMap[Screen.UserScreen] as UserViewModel).message.collect { message ->
                     message?.let {
                         Toast.makeText(applicationContext, it, Toast.LENGTH_LONG).show()
@@ -54,19 +54,29 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-
         installSplashScreen().apply {
             setKeepOnScreenCondition{
                 (viewModelMap[Screen.UserScreen] as UserViewModel).isLoading.value
             }
         }
         setContent {
-            RecipesAppTheme {
-                Navigation(viewModels = viewModelMap)
+            RecipesAppTheme {Navigation(viewModels = viewModelMap)
+
+
             }
 
         }
     }
+    override fun onStop() {
+        super.onStop()
 
+        authRepository.updateFavoritesInDatabase()
+        authRepository.updateSeenInDatabase()
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+
+        authRepository.updateFavoritesInDatabase()
+        authRepository.updateSeenInDatabase()
+    }
 }

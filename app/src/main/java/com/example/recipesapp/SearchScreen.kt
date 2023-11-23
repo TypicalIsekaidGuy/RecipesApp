@@ -2,15 +2,12 @@ package com.example.recipesapp
 
 import android.annotation.SuppressLint
 
-import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,16 +36,14 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -57,7 +52,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,11 +62,11 @@ import com.example.recipesapp.ui.MaterialText
 @Composable
 fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
 
-    val imageResource = R.drawable.test_image // Replace with your image resource name
-    val context = LocalContext.current
-    val bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, imageResource)
-    val imageBitmap: ImageBitmap = bitmap.asImageBitmap()
-    val recipes = viewModel.data.collectAsState()
+
+
+
+
+    val recipes = viewModel.data
     val sortItems = viewModel.sort_list
 
     val selectorState = mutableStateOf(false)
@@ -385,13 +379,12 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
             SearchTextField(viewModel, onTextFieldValueChange = { viewModel.onSearchChange(searchText.value) })
             RecipePreviewList(recipes.value){ recipe ->
                 viewModel.setCurrentRecipe(recipe)
-                navigateToMainScreen(controller, recipe)
+                navigateToMainScreen(controller)
             }
         }
     }
 }
-fun navigateToMainScreen(controller: NavHostController, recipe: Recipe){
-    Log.d("huy",recipe.toString())
+fun navigateToMainScreen(controller: NavHostController){
     controller.navigate("${Screen.MainScreen.route}")
 }
 @Composable
@@ -653,13 +646,13 @@ fun RecipePreviewItem(
                             UnderneathSpecifier(
                                 modifier = Modifier,
                                 color = MaterialTheme.colorScheme.onSecondary,
-                                text = "${recipe.prepareTime} mins",
+                                text = recipe.prepareTime.minsToString(),
                                 fontSize = 16.sp
                             )
                             UnderneathSpecifier(
                                 modifier = Modifier,
                                 color = MaterialTheme.colorScheme.onSecondary,
-                                text = "${recipe.views}k views",
+                                text = recipe.views.viewsToString(),
                                 fontSize = 16.sp
                             )
                         }

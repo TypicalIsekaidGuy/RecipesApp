@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.recipesapp.ui.MaterialText
+import kotlinx.coroutines.flow.collect
 
 
 @Composable
@@ -50,7 +52,8 @@ fun FavoriteScreen(controller: NavHostController, viewModel: FavoriteViewModel){
     val context = LocalContext.current
     val bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, imageResource)
     val imageBitmap: ImageBitmap = bitmap.asImageBitmap()
-
+    /*viewModel.getFavorites()*/
+    val meals = viewModel.data
 
     val list_ingridients = listOf<Ingredient>(
         Ingredient("pepper".hashCode(),"pepper",0.5f,true),
@@ -62,16 +65,19 @@ fun FavoriteScreen(controller: NavHostController, viewModel: FavoriteViewModel){
         Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done",""),
         Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done",""),
     )
-    val meals = mutableListOf(
+/*    val meals = mutableListOf(
         Meal("Salad",list),
         Meal("Cherry",list),
         Meal("Main Course",list)
-    )
+    )*/
     Column(modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 32.dp)) {
         FavoriteTopBar{controller.popBackStack()}
-        MealSlideList(meals)
+        MealSlideList(meals.toList()){ recipe ->
+            viewModel.setCurrentRecipe(recipe)
+            navigateToMainScreen(controller)
+        }
     }    
 }
 @Composable
@@ -105,7 +111,7 @@ fun FavoriteTopBar(goBackToScreen: ()-> Unit){
     }
 }
 @Composable
-fun MealSlideList(meals: List<Meal>) {
+fun MealSlideList(meals: List<Meal>, onClick:(Recipe)->Unit) {
 
             Column(
                 modifier = Modifier
@@ -113,13 +119,13 @@ fun MealSlideList(meals: List<Meal>) {
                     .padding(top = 32.dp)
             ) {
                 for (i in meals)
-                    MealSlideItem(meal = i)
+                    MealSlideItem(meal = i){recipe -> onClick(recipe) }
             }
 
 
 }
 @Composable
-fun MealSlideItem(meal: Meal) {
+fun MealSlideItem(meal: Meal, onClick:(Recipe)->Unit) {
     var isExpanded by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(targetValue = if (isExpanded) 180f else 0f)
 
@@ -158,15 +164,15 @@ fun MealSlideItem(meal: Meal) {
         AnimatedVisibility(visible = isExpanded) {
             LazyVerticalGrid(columns = GridCells.Fixed(2), horizontalArrangement = Arrangement.spacedBy(8.dp)){
                 items(meal.recipies.size){index->
-                    MealItem(recipe = meal.recipies[index])
+                    MealItem(recipe = meal.recipies[index], { onClick(it) })
                 }
             }
         }
 }
 }
 @Composable
-fun MealItem(recipe: Recipe){
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 16.dp)) {
+fun MealItem(recipe: Recipe, onClick:(Recipe)->Unit){
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 16.dp).clickable { onClick(recipe) }) {
         Box( modifier = Modifier.clip(
             RoundedCornerShape(12.dp)
         )){
@@ -176,8 +182,8 @@ fun MealItem(recipe: Recipe){
         }
         Text(recipe.name, textAlign = TextAlign.Center, fontSize = 16.sp, color = MaterialTheme.colorScheme.tertiary)
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
-            UnderneathSpecifier(Modifier, MaterialTheme.colorScheme.tertiary, "${ recipe.prepareTime } mins")
-            UnderneathSpecifier(Modifier, MaterialTheme.colorScheme.tertiary, "${ recipe.views }k views ")
+            UnderneathSpecifier(Modifier, MaterialTheme.colorScheme.tertiary, recipe.prepareTime.minsToString())
+            UnderneathSpecifier(Modifier, MaterialTheme.colorScheme.tertiary, recipe.views.viewsToString())
         }
     }
 }

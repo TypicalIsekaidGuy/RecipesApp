@@ -36,7 +36,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,13 +67,13 @@ fun MainScreen(controller: NavHostController, viewModel: MainViewModel) {
     val ingredientText = viewModel.ingredientText
     val descriptionText = recipe.description
     val presentationText = recipe.presentation
-    val isFavorite = remember{viewModel.isFavorite}
+    var isFavorite = remember {mutableStateOf(false)}
+    isFavorite.value = viewModel.isFavorite.value
 
 /*
     val recipe =         Recipe("Vegan Mix Vegetable Ceaser".hashCode(),"Vegan Mix Vegetable Ceaser",imageBitmap,20,140, "salad",list_ingridients, "This is easeily done")
 */
     val servings by viewModel.servings
-    viewModel.checkRecipe()
     LazyColumn(modifier = Modifier
         .fillMaxWidth()) {
         item{
@@ -151,9 +150,8 @@ fun MainTopBar(goBackToScreen: ()-> Unit,add: ()-> Unit,remove: ()-> Unit,isFavo
                         contentDescription = "Icon 2",
                         modifier = Modifier.clickable {
                             isFavorite.value = !isFavorite.value
-                            Log.d("AuthRepository",isFavorite.value.toString())
-                            if(isFavorite.value)
-                                add()
+                                                      if(isFavorite.value)
+                                                          add()
                             else
                                 remove()
                         },
@@ -235,9 +233,7 @@ fun DetailsClarification(name: String, time: String){
             modifier = Modifier.align(Alignment.CenterHorizontally),
             textStyle = MaterialTheme.typography.headlineMedium)
         MaterialText(text = time,
-            modifier = Modifier
-                .padding(top = 12.dp)
-                .align(Alignment.CenterHorizontally),
+            modifier = Modifier.padding(top = 12.dp).align(Alignment.CenterHorizontally),
             textStyle = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
 
     }
@@ -296,22 +292,18 @@ fun DescriptionItem(
             enter = expandVertically(),
             exit =shrinkVertically()
         ) {
-            Box(
-                modifier = Modifier
-                    .background(backgroundColor)
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Box(modifier = Modifier
+                .background(backgroundColor)){
 
-                    MaterialText(
-                        text = text,
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        textStyle = MaterialTheme.typography.headlineMedium,
-                        lineHeight = 24.sp
-                    )
-                }
+                MaterialText(
+                    text = text,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    textStyle = MaterialTheme.typography.headlineMedium,
+                    lineHeight = 24.sp
+                )
             }
         }
-
     }
 }

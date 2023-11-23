@@ -37,3 +37,24 @@ fun Navigation(viewModels: HashMap<Screen, ViewModel>){
         }*/
     }
 }
+
+fun Int.viewsToString(): String {
+    return when {
+        this == 1 -> "1 view"
+        this in 2..100 -> "$this views"
+        this in 101..999 -> "${this / 10 * 10} views"
+        this in 1000..999999 -> "${this / 1000}k views"
+        else -> "${this / 1000000}M views"
+    }
+}
+
+fun Int.minsToString(): String{
+    when{
+        this<60 -> return "$this mins"
+        this == 60 -> return "1 hour"
+        this in 61..119 -> return "1 hour \n${this%60} mins"
+        this> 119 && this%60==0 -> return "${this/60} hours"
+        this> 120 && this%60!=0 -> return "${this/60} hours \n${this%60} mins"
+    }
+    return ""
+}

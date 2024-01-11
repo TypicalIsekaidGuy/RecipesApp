@@ -1,14 +1,11 @@
-package com.example.recipesapp
+package com.example.recipesapp.ui.screens
 
 import androidx.compose.ui.graphics.Color
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -53,16 +50,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.recipesapp.viewmodel.MainViewModel
+import com.example.recipesapp.R
 import com.example.recipesapp.ui.MaterialText
 
 @Composable
 fun MainScreen(controller: NavHostController, viewModel: MainViewModel) {
 
-    val imageResource = R.drawable.test_image // Replace with your image resource name
-    val context = LocalContext.current
-    val bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, imageResource)
-    val imageBitmap: ImageBitmap = bitmap.asImageBitmap()
+
+    val imageResource = viewModel.currentRecipe.image
     val recipe = viewModel.currentRecipe
     val ingredientText = viewModel.ingredientText
     val descriptionText = recipe.description
@@ -92,7 +88,7 @@ fun MainScreen(controller: NavHostController, viewModel: MainViewModel) {
                         .background(Color.Gray) // Set a background color (you can change this)
                 ) {
                     Image(
-                        painterResource(id = imageResource),
+                        imageResource,
                         contentDescription = null, // Provide a description if needed
                         contentScale = ContentScale.Crop, // Crop the image to fit the box
                         modifier = Modifier.fillMaxSize(),
@@ -128,7 +124,7 @@ fun MainTopBar(goBackToScreen: ()-> Unit,add: ()-> Unit,remove: ()-> Unit,isFavo
                     .background(MaterialTheme.colorScheme.secondary)
                     .padding(8.dp)){
                     Icon(
-                        painter = painterResource(id = R.drawable.baseline_exit_24),
+                        painter = painterResource(id = R.drawable.baseline_transit_enterexit_32),
                         contentDescription = "Icon 2",
                         modifier = Modifier.clickable { goBackToScreen() },
                         tint = MaterialTheme.colorScheme.primary
@@ -146,12 +142,12 @@ fun MainTopBar(goBackToScreen: ()-> Unit,add: ()-> Unit,remove: ()-> Unit,isFavo
                     .background(MaterialTheme.colorScheme.secondary)
                     .padding(8.dp)){
                     Icon(
-                        painter = painterResource(id = R.drawable.baseline_lock_24),
+                        painter = painterResource(id = R.drawable.baseline_heart_broken_32),
                         contentDescription = "Icon 2",
                         modifier = Modifier.clickable {
                             isFavorite.value = !isFavorite.value
-                                                      if(isFavorite.value)
-                                                          add()
+                            if(isFavorite.value)
+                                add()
                             else
                                 remove()
                         },

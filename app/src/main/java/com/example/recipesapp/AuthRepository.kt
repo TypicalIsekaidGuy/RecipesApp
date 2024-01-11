@@ -1,27 +1,26 @@
 package com.example.recipesapp
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import com.example.recipesapp.model.Ingredient
+import com.example.recipesapp.model.Meal
+import com.example.recipesapp.model.Recipe
+import com.example.recipesapp.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ServerValue
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -36,11 +35,12 @@ class AuthRepository() {
     var recipess = listOf<Recipe>()
     var favorites = mutableStateOf(mutableListOf<Recipe>())
     var favoriteMeals = mutableStateOf(mutableListOf<Meal>())
-    private val firebaseData = Firebase.database("https://recipiesapp-b482b-default-rtdb.europe-west1.firebasedatabase.app/").reference
+    val firebaseData = Firebase.database("https://recipiesapp-b482b-default-rtdb.europe-west1.firebasedatabase.app/").reference
     val list_ingredients1 = listOf<Ingredient>(
         Ingredient("Lettuce".hashCode(), "Lettuce", 2.0f, true),)
 
-    var currentRecipe = mutableStateOf(Recipe(
+    var currentRecipe = mutableStateOf(
+        Recipe(
         "Vegan Mix Vegetable Caesar".hashCode(),
         "Vegan Mix Vegetable Caesar",
         ImageBitmap(20,20),
@@ -51,7 +51,8 @@ class AuthRepository() {
         "1. Wash and chop lettuce, cucumbers, tomatoes, bell peppers, and red onions.\n" +
                 "2. In a bowl, mix olive oil, vinegar, salt, and pepper to make the dressing.\n" +
                 "3. Toss the chopped vegetables with the dressing and serve."
-    ))
+    )
+    )
 
     fun logout() = auth.signOut()
 
@@ -172,8 +173,12 @@ class AuthRepository() {
             }
         }
     }
-    suspend fun getRecipesFromDatabase(isLoading: MutableState<Boolean>){
-        val recipes = mutableListOf<Recipe>()
+    suspend fun getRecipesFromDatabase(){
+        val recipes = mutableListOf<Recipe>()/*
+        val dataSnapshot = firebaseData.child("recipes").get().addOnSuccessListener{
+
+            try {}
+        }*/
         Log.d(TAG,"Started")
         try {
             val dataSnapshot = firebaseData.child("recipes").get().await()
@@ -238,16 +243,60 @@ class AuthRepository() {
     }
 
 
+/*    suspend fun updateImages(context: Context) {
+        val recipesRef = firebaseData.child("recipes")
 
-    // Helper function to convert ImageBitmap to base64 (implement this)
-// Function to convert ImageBitmap to base64
+        val map = mapOf(
+            "Beef Tacos" to R.drawable.beef_tacos,
+            "Grilled Chicken Salad" to R.drawable.grilled_chicken_salad,
+            "Homemade Pizza" to R.drawable.homemade_pizza,
+            "Lemon Herb Roasted Chicken" to R.drawable.lemon_herb_roasted_chicken,
+            "Mix Vegetable Caesar" to R.drawable.mix_vegetable_ceaser, // Corrected spelling
+            "Mushroom Risotto" to R.drawable.mushroom_risotto,
+            "Pan-Seared Salmon" to R.drawable.pan_seared_salmon,
+            "Pumpkin Soup" to R.drawable.pumpkin_soup,
+            "Spaghetti Carbonara" to R.drawable.spaghetti_carbonara,
+            "Vegetable Stir-Fry" to R.drawable.vegetable_stir_fry
+        )
+
+        for (recipe in recipess) {
+            map[recipe.name]?.let { resourceId ->
+                val bitmap = BitmapFactory.decodeResource(context.resources, resourceId).asImageBitmap()
+                val base64Image = convertImageBitmapToBase64(bitmap)
+
+                recipesRef.child(recipe.name).updateChildren(mapOf("image" to base64Image))
+            } ?: run {
+                Log.e("Authss", "Resource not found for recipe: ${recipe.name}")
+            }
+        }
+    }*/
+
+
+
     private fun convertImageBitmapToBase64(imgbm: ImageBitmap): String {
-        val bm : Bitmap =  imgbm.asAndroidBitmap()
+        val bm: Bitmap = imgbm.asAndroidBitmap()
+
+        // Define the target width and height
+        val targetWidth = 600
+        val targetHeight = 1335//exactly this becaouse its half of xiami 14 size
+
+        // Calculate the aspect ratio to maintain it during scaling
+        val aspectRatio = bm.width.toFloat() / bm.height.toFloat()
+
+        // Calculate the target width based on the aspect ratio
+        val scaledWidth = (targetHeight * aspectRatio).toInt()
+
+        // Create the scaled bitmap
+        val scaledBitmap = Bitmap.createScaledBitmap(bm, scaledWidth, targetHeight, true)
+
+        // Convert the scaled bitmap to Base64
         val baos = ByteArrayOutputStream()
-        bm.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         val b = baos.toByteArray()
+
         return Base64.encodeToString(b, Base64.DEFAULT)!!
     }
+
     private fun convertBase64ToImageBitmap(base64String: String): ImageBitmap? {
 
             val imageBytes = Base64.decode(base64String, Base64.DEFAULT)

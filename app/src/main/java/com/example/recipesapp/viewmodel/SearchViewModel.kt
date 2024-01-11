@@ -1,15 +1,14 @@
-package com.example.recipesapp
+package com.example.recipesapp.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import com.example.recipesapp.AuthRepository
+import com.example.recipesapp.model.Recipe
+import com.example.recipesapp.model.SortElement
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class SearchViewModel(val authRepository: AuthRepository): ViewModel() {
     val TAG = "SearchViewModel"
@@ -66,6 +65,9 @@ private val _data: MutableState<List<Recipe>> = mutableStateOf(authRepository.re
 
         Log.d(TAG,_data.toString())
         Log.d(TAG,data.toString())
+    }
+    fun sortAll(){
+        sortRecipes("All")
     }
 
 /*    fun loadRecipes(){

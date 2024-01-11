@@ -1,22 +1,10 @@
-package com.example.recipesapp
+package com.example.recipesapp.viewmodel
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Log
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.imageResource
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
-import java.util.Locale
+import com.example.recipesapp.AuthRepository
+import com.example.recipesapp.model.Recipe
 
 class FavoriteViewModel(private val authRepository: AuthRepository): ViewModel() {
     var data by authRepository.favoriteMeals

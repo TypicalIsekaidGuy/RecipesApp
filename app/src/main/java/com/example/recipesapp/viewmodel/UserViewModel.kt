@@ -1,14 +1,15 @@
-package com.example.recipesapp
+package com.example.recipesapp.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
+import com.example.recipesapp.AuthRepository
+import com.example.recipesapp.model.Favorites
+import com.example.recipesapp.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 class UserViewModel(private val authRepository: AuthRepository, private val setRecipes: () -> Unit): ViewModel() {
     val TAG = "USER_VIEW_MODEL"
@@ -31,11 +32,14 @@ class UserViewModel(private val authRepository: AuthRepository, private val setR
         /*authRepository.getFavorites()*/
         viewModelScope.launch {
             try {
+                Log.d(TAG,"Started")
+                authRepository.getRecipesFromDatabase()
 
-                authRepository.getRecipesFromDatabase(isLoading)
+                Log.d(TAG,"Fetched")
                 isUserInitialized.value =  authRepository.checkUser()//make splashScreen and check it there
                 Log.d(TAG,authRepository.recipess.toString())
                 setRecipes()
+                Log.d(TAG,"Stopped")
                 isLoading.value = false
             }
             catch (e:Exception){

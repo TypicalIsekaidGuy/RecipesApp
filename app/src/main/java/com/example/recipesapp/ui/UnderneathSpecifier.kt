@@ -1,4 +1,4 @@
-package com.example.recipesapp
+package com.example.recipesapp.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

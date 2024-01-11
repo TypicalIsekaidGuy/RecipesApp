@@ -1,11 +1,7 @@
-package com.example.recipesapp
+package com.example.recipesapp.model
 
 import android.net.Uri
-import android.os.Parcel
-import android.os.Parcelable
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.res.imageResource
-import androidx.versionedparcelable.VersionedParcelize
 import com.google.gson.Gson
 
 data class Recipe(

@@ -4,14 +4,19 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.Surface
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.recipesapp.model.Screen
+import com.example.recipesapp.ui.screens.Navigation
 import com.example.recipesapp.ui.theme.RecipesAppTheme
+import com.example.recipesapp.viewmodel.FavoriteViewModel
+import com.example.recipesapp.viewmodel.MainViewModel
+import com.example.recipesapp.viewmodel.SearchViewModel
+import com.example.recipesapp.viewmodel.UserViewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -60,7 +65,8 @@ class MainActivity : ComponentActivity() {
             }
         }
         setContent {
-            RecipesAppTheme {Navigation(viewModels = viewModelMap)
+            RecipesAppTheme {
+                Navigation(viewModels = viewModelMap)
 
 
             }

@@ -1,4 +1,4 @@
-package com.example.recipesapp
+package com.example.recipesapp.model
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth

@@ -1,13 +1,14 @@
-package com.example.recipesapp
+package com.example.recipesapp.viewmodel
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
+import com.example.recipesapp.AuthRepository
+import com.example.recipesapp.model.Recipe
+import com.example.recipesapp.ui.screens.minsToString
+import com.example.recipesapp.model.Ingredient
 
 class MainViewModel(val authRepository: AuthRepository): ViewModel() {
     var currentRecipe by authRepository.currentRecipe

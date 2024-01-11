@@ -1,4 +1,4 @@
-package com.example.recipesapp
+package com.example.recipesapp.model
 
 sealed class Screen(val route: String){
     object MainScreen: Screen("main_screen")

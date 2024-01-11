@@ -1,13 +1,19 @@
-package com.example.recipesapp
+package com.example.recipesapp.ui.screens
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.google.gson.Gson
+import com.example.recipesapp.ui.screens.FavoriteScreen
+import com.example.recipesapp.ui.screens.MainScreen
+import com.example.recipesapp.model.Screen
+import com.example.recipesapp.ui.screens.SearchScreen
+import com.example.recipesapp.ui.screens.UserScreen
+import com.example.recipesapp.viewmodel.FavoriteViewModel
+import com.example.recipesapp.viewmodel.MainViewModel
+import com.example.recipesapp.viewmodel.SearchViewModel
+import com.example.recipesapp.viewmodel.UserViewModel
 
 @Composable
 fun Navigation(viewModels: HashMap<Screen, ViewModel>){

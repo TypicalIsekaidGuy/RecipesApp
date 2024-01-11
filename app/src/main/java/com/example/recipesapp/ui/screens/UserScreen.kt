@@ -1,4 +1,4 @@
-package com.example.recipesapp
+package com.example.recipesapp.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -41,15 +41,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.recipesapp.ui.MaterialText
 import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieClipSpec
 import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.recipesapp.R
+import com.example.recipesapp.viewmodel.UserViewModel
+import com.example.recipesapp.model.Screen
 
 @Composable
 fun UserScreen(navController: NavController, userViewModel: UserViewModel){

@@ -1,4 +1,4 @@
-package com.example.recipesapp
+package com.example.recipesapp.ui.screens
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,8 +40,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.recipesapp.viewmodel.FavoriteViewModel
+import com.example.recipesapp.model.Ingredient
+import com.example.recipesapp.model.Meal
+import com.example.recipesapp.R
+import com.example.recipesapp.model.Recipe
+import com.example.recipesapp.ui.UnderneathSpecifier
 import com.example.recipesapp.ui.MaterialText
-import kotlinx.coroutines.flow.collect
 
 
 @Composable
@@ -96,7 +100,7 @@ fun FavoriteTopBar(goBackToScreen: ()-> Unit){
             .align(Alignment.TopStart)
             .padding(8.dp)){
             Icon(
-                painter = painterResource(id = R.drawable.baseline_exit_20),
+                painter = painterResource(id = R.drawable.baseline_transit_enterexit_32),
                 contentDescription = "Icon 2",
                 modifier = Modifier.clickable { goBackToScreen() },
                 tint = MaterialTheme.colorScheme.primary

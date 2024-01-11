@@ -1,4 +1,4 @@
-package com.example.recipesapp
+package com.example.recipesapp.model
 open class Event<out T>(private val content: T) {
     var hasBeenHandled = false
         private set // Allow external read but not write

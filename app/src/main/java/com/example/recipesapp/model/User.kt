@@ -1,4 +1,4 @@
-package com.example.recipesapp
+package com.example.recipesapp.model
 
 data class User (
     val id: Int,

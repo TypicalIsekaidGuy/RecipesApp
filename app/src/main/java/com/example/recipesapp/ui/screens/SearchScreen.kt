@@ -1,10 +1,7 @@
-package com.example.recipesapp
+package com.example.recipesapp.ui.screens
 
 import android.annotation.SuppressLint
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,25 +34,32 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.recipesapp.model.NavItems
+import com.example.recipesapp.R
+import com.example.recipesapp.model.Recipe
+import com.example.recipesapp.viewmodel.SearchViewModel
+import com.example.recipesapp.model.SortElement
+import com.example.recipesapp.ui.UnderneathSpecifier
+import com.example.recipesapp.model.Screen
 import com.example.recipesapp.ui.MaterialText
 
 @SuppressLint("UnrememberedMutableState")
@@ -335,52 +339,15 @@ fun SearchScreen(controller: NavHostController, viewModel: SearchViewModel) {
         Meal("Main Course",list)
     )*/
 
-    ModalNavigationDrawer(                        drawerContent = {
-        ModalDrawerSheet {
-            Spacer(modifier = Modifier.height(16.dp))
-            list.forEachIndexed { index, item ->
-                NavigationDrawerItem(
-                    label = {
-                        Text(text = item.title)
-                    },
-                    selected = index == selectedItemIndex,
-                    onClick = {
-//                                            navController.navigate(item.route)
-                        selectedItemIndex = index
-                        controller.navigate(Screen.FavoriteScreen.route)
-/*                        scope.launch {
-                            drawerState.close()
-                        }*/
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = if (index == selectedItemIndex) {
-                                item.selectedIcon
-                            } else item.unselectedIcon,
-                            contentDescription = item.title
-                        )
-                    },
-                    badge = {
-                        item.badgeCount?.let {
-                            Text(text = item.badgeCount.toString())
-                        }
-                    },
-                    modifier = Modifier
-                        .padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
-            }
-        }
-    },) {
-        Column(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)) {
-            SearchTopBar(){controller.navigate(Screen.FavoriteScreen.route)}
-            SearchSortBar(modifier = Modifier, sortList = sortItems )
-            SearchTextField(viewModel, onTextFieldValueChange = { viewModel.onSearchChange(searchText.value) })
-            RecipePreviewList(recipes.value){ recipe ->
-                viewModel.setCurrentRecipe(recipe)
-                navigateToMainScreen(controller)
-            }
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp)) {
+        SearchTopBar(){controller.navigate(Screen.FavoriteScreen.route)}
+        SearchSortBar(modifier = Modifier, sortList = sortItems) { viewModel.sortAll() }
+        SearchTextField(viewModel, onTextFieldValueChange = { viewModel.onSearchChange(searchText.value) })
+        RecipePreviewList(recipes.value){ recipe ->
+            viewModel.setCurrentRecipe(recipe)
+            navigateToMainScreen(controller)
         }
     }
 }
@@ -438,7 +405,7 @@ fun SearchTopBar(onClick: () -> Unit) {
 }
 
 @Composable
-fun SearchSortBar(modifier: Modifier, sortList: List<SortElement>){
+fun SearchSortBar(modifier: Modifier, sortList: List<SortElement>, sortAll:()-> Unit){
     val pickedId = remember{
         mutableStateOf(-1)
     }
@@ -446,7 +413,8 @@ fun SearchSortBar(modifier: Modifier, sortList: List<SortElement>){
 
         LazyRow(modifier = Modifier.padding(top = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)){
             items(sortList.size){item->
-                SortItem(sortItem = sortList[item], pickedId = pickedId, colorScheme = MaterialTheme.colorScheme)
+                SortItem(sortItem = sortList[item], pickedId = pickedId, colorScheme = MaterialTheme.colorScheme
+                ) { sortAll() }
             }
         }
     }
@@ -455,7 +423,8 @@ fun SearchSortBar(modifier: Modifier, sortList: List<SortElement>){
 fun SortItem(
     sortItem: SortElement,
     pickedId: MutableState<Int>,
-    colorScheme: ColorScheme
+    colorScheme: ColorScheme,
+    sortAll: () -> Unit
 ) {
 
         Box(
@@ -468,6 +437,7 @@ fun SortItem(
                 .clickable {
                     if (pickedId.value == sortItem.order) {
                         pickedId.value = -1
+                        sortAll()
                     } else {
                         pickedId.value = sortItem.order
                         sortItem.onClick()
@@ -564,7 +534,7 @@ fun SearchTextField(viewModel: SearchViewModel, onTextFieldValueChange: (String)
 }
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RecipePreviewList(recipes: List<Recipe>,  onClick: (Recipe) -> Unit) {
+fun RecipePreviewList(recipes: List<Recipe>, onClick: (Recipe) -> Unit) {
     val scrollState = rememberLazyListState()
     val itemCount = recipes.size
 
@@ -610,55 +580,62 @@ fun RecipePreviewItem(
     recipe: Recipe,
     openRecipe: ()-> Unit
 ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        // Add any content you want above the image here.
+    }
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(64.dp))
+            .clickable { openRecipe() }
+    ) {
+        Image(
+            bitmap = recipe.image,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.FillHeight
+        )
+        Box(){
+
+            Column(
+                verticalArrangement = Arrangement.Bottom,
+                modifier = Modifier.fillMaxHeight().align(Alignment.Center)
+            ) {
+                MaterialText(
+                    text = recipe.name,
+                    textAlign = TextAlign.Center,
+                    textStyle = TextStyle(
+                        shadow = Shadow(color = Color.White, offset = Offset(5f,10f)), fontSize = 32.sp
+                    ),
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    color = MaterialTheme.colorScheme.secondary,
+                    lineHeight = 24.sp,
+                )
+                Row(
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    // Add any content you want above the image here.
-                }
-                Box(
-                    modifier = Modifier
-                        .size(width = 360.dp, height = 640.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { openRecipe() }
-                ) {
-                    Image(
-                        bitmap = recipe.image,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(12.dp))
+                    UnderneathSpecifier(
+                        modifier = Modifier,
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        text = recipe.prepareTime.minsToString(),
+                        fontSize = 16.sp
                     )
-                    Column(
-                        verticalArrangement = Arrangement.Bottom,
-                        modifier = Modifier.fillMaxHeight()
-                    ) {
-                        MaterialText(
-                            text = recipe.name,
-                            textAlign = TextAlign.Center,
-                            textStyle = MaterialTheme.typography.headlineMedium,
-                            modifier = Modifier,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceAround,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            UnderneathSpecifier(
-                                modifier = Modifier,
-                                color = MaterialTheme.colorScheme.onSecondary,
-                                text = recipe.prepareTime.minsToString(),
-                                fontSize = 16.sp
-                            )
-                            UnderneathSpecifier(
-                                modifier = Modifier,
-                                color = MaterialTheme.colorScheme.onSecondary,
-                                text = recipe.views.viewsToString(),
-                                fontSize = 16.sp
-                            )
-                        }
-                    }
+                    UnderneathSpecifier(
+                        modifier = Modifier,
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        text = recipe.views.viewsToString(),
+                        fontSize = 16.sp
+                    )
                 }
+            }
+        }
+    }
 
 
 
 }
+
